@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الإيموجي - صيغة IMOKO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --menu-bg: #0f172a; 
+            --menu-text: #e2e8f0;
+            --canvas-bg-area: #1e293b;
+            --sidebar-width: 170px; /* عرض نحيف ومناسب */
+        }
+
+        body { display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--canvas-bg-area); color: var(--menu-text); overflow: hidden; }
+
+        /* تنسيق الشريط العلوي */
+        #top-menu {
+            height: 50px; background: var(--menu-bg); display: flex; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid #334155; gap: 25px; z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* تحويل الشريط لجانبي في الموبايل */
+        @media (max-width: 768px) {
+            #top-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: var(--sidebar-width);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding: 40px 5px;
+                transform: translateX(100%); /* مخفي */
+                border-bottom: none;
+                border-left: 1px solid rgba(255,255,255,0.1);
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+                gap: 15px;
+            }
+
+            /* فئة التبديل للإظهار */
+            #top-menu.active-sidebar {
+                transform: translateX(0);
+            }
+
+            .logo { margin-bottom: 20px; font-size: 20px; }
+            .menu-item { width: 90%; font-size: 13px; text-align: center; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            
+            .dropdown {
+                top: 0 !important;
+                right: 100% !important;
+                border-radius: 8px 0 0 8px !important;
+                min-width: 140px !important;
+            }
+            
+            .btn-main-add { font-size: 12px; padding: 10px 5px; width: 90%; }
+            #layers-panel { display: none; }
+            #canvas-area { padding: 10px; }
+        }
+
+        .logo { font-size: 24px; margin-left: 10px; cursor: default; }
+
+        .menu-item { position: relative; cursor: pointer; font-size: 15px; font-weight: 500; padding: 5px 10px; border-radius: 5px; transition: 0.2s; }
+        .menu-item:hover { background: #334155; }
+        
+        .dropdown {
+            display: none; position: absolute; top: 100%; right: 0; background: #1e293b;
+            min-width: 200px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border-radius: 0 0 8px 8px;
+            border: 1px solid #334155; padding: 10px 0; z-index: 1001;
+        }
+        .menu-item:hover .dropdown { display: block; }
+
+        .dropdown-item { padding: 10px 20px; display: flex; align-items: center; gap: 10px; transition: 0.2s; white-space: nowrap; cursor: pointer; }
+        .dropdown-item:hover { background: #334155; }
+        .dropdown-item input { width: 60px; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 4px; padding: 2px 5px; }
+
+        #main-workspace { display: flex; flex-grow: 1; position: relative; overflow: hidden; }
+        #canvas-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 40px; overflow: auto; cursor: pointer; }
+        #canvas-wrapper { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); line-height: 0; background: white; border-radius: 4px; cursor: default; }
+
+        #layers-panel {
+            width: 220px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px);
+            border-right: 1px solid #334155; padding: 15px; display: flex; flex-direction: column;
+        }
+        .layer-item {
+            display: flex; align-items: center; background: #334155; border-radius: 8px;
+            margin-bottom: 8px; padding: 8px; cursor: grab; font-size: 14px;
+        }
+        .layer-preview { margin-right: auto; font-size: 18px; }
+
+        .btn-main-add { background: #2563eb; color: white; border: none; padding: 5px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        #emoji-picker-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; box-shadow: 0 20px 25px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body onclick="closeSidebar(event)">
+
+<header id="top-menu">
+    <div class="logo">😍</div>
+    
+    <div class="menu-item">
+        ملف (File)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="saveImg()">💾 حفظ الصورة (PNG)</div>
+            <div class="dropdown-item" onclick="saveProject()">📤 حفظ كملف (.imoko)</div>
+            <div class="dropdown-item" onclick="document.getElementById('importFile').click()">📥 فتح مشروع (.imoko)</div>
+            <div class="dropdown-item" onclick="newProject()">✨ مشروع جديد</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        تعديل (Edit)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="undo()">↩️ تراجع</div>
+            <div class="dropdown-item" onclick="redo()">↪️ إعادة</div>
+            <div class="dropdown-item" onclick="duplicateObject()">📄 تكرار العنصر</div>
+            <div class="dropdown-item" onclick="deleteObj()" style="color: #ef4444;">❌ حذف المختار</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        عرض (View)
+        <div class="dropdown">
+            <div class="dropdown-item">عرض: <input type="number" id="canvas-width" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">طول: <input type="number" id="canvas-height" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">الخلفية: <input type="color" id="canvas-bg" value="#ffffff" onchange="applySettings()"></div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        ترتيب (Selection)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="flipObject()">↔️ قلب أفقي</div>
+        </div>
+    </div>
+
+    <button class="btn-main-add" onclick="toggleEmojiPicker()">+ إضافة إيموجي</button>
+    <input type="file" id="importFile" style="display:none" accept=".imoko" onchange="importProject(event)">
+</header>
+
+<div id="main-workspace">
+    <aside id="layers-panel">
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الطبقات (اسحب للترتيب)</p>
+        <div id="layers-list"></div>
+    </aside>
+
+    <main id="canvas-area" onclick="toggleSidebar(event)">
+        <div id="canvas-wrapper" onclick="event.stopPropagation()">
+            <canvas id="smartCanvas"></canvas>
+        </div>
+    </main>
+</div>
+
+<div id="emoji-picker-container"></div>
+
+<script>
+    const canvas = new fabric.Canvas('smartCanvas', { width: 500, height: 500, backgroundColor: '#ffffff' });
+    let history = [JSON.stringify(canvas)];
+    let redoStack = [];
+    let isChanged = false;
+
+    // --- وظائف التحكم في الشريط الجانبي بالموبايل ---
+    function toggleSidebar(e) {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.toggle('active-sidebar');
+            e.stopPropagation();
+        }
+    }
+
+    function closeSidebar(e) {
+        if (window.innerWidth <= 768) {
+            const menu = document.getElementById('top-menu');
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('active-sidebar');
+            }
+        }
+    }
+
+    // إغلاق الشريط عند بدء التفاعل مع اللوحة (Canvas) لزيادة التركيز
+    canvas.on('mouse:down', () => {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    });
+
+    window.onbeforeunload = function() {
+        if (isChanged) return "لديك عمل لم يتم حفظه، هل أنت متأكد من المغادرة؟";
+    };
+
+    function saveState() {
+        history.push(JSON.stringify(canvas));
+        if (history.length > 20) history.shift();
+        redoStack = [];
+        isChanged = true;
+    }
+
+    function saveProject() {
+        const json = JSON.stringify(canvas.toJSON());
+        const blob = new Blob([json], { type: "application/json" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "design.imoko";
+        link.click();
+        isChanged = false;
+    }
+
+    function importProject(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            canvas.loadFromJSON(e.target.result, () => {
+                canvas.renderAll();
+                renderLayers();
+                saveState();
+                isChanged = false;
+            });
+        };
+        reader.readAsText(file);
+    }
+
+    function newProject() {
+        if (isChanged && !confirm("هل تريد البدء من جديد؟ ستفقد التغييرات غير المحفوظة.")) return;
+        location.reload();
+    }
+
+    function applySettings() {
+        const w = parseInt(document.getElementById('canvas-width').value);
+        const h = parseInt(document.getElementById('canvas-height').value);
+        const bg = document.getElementById('canvas-bg').value;
+        canvas.setWidth(w); canvas.setHeight(h);
+        canvas.setBackgroundColor(bg, canvas.renderAll.bind(canvas));
+        saveState();
+    }
+
+    const picker = new EmojiMart.Picker({
+        onEmojiSelect: (emoji) => { addEmoji(emoji.native); toggleEmojiPicker(); },
+        locale: 'ar', theme: 'dark'
+    });
+    document.getElementById('emoji-picker-container').appendChild(picker);
+
+    function toggleEmojiPicker() {
+        const p = document.getElementById('emoji-picker-container');
+        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        // إغلاق الشريط تلقائياً عند فتح الإيموجي لتوسيع الرؤية
+        if (p.style.display === 'block' && window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    }
+
+    function addEmoji(emoji) {
+        const text = new fabric.Text(emoji, { left: canvas.width/2 - 40, top: canvas.height/2 - 40, fontSize: 80 });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        saveState();
+    }
+
+    function undo() {
+        if (history.length <= 1) return;
+        redoStack.push(history.pop());
+        canvas.loadFromJSON(history[history.length - 1], () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop(); history.push(state);
+        canvas.loadFromJSON(state, () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function flipObject() {
+        const active = canvas.getActiveObject();
+        if (active) { active.set('flipX', !active.flipX); canvas.renderAll(); saveState(); }
+    }
+
+    function duplicateObject() {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        active.clone((cloned) => {
+            cloned.set({ left: cloned.left + 20, top: cloned.top + 20 });
+            canvas.add(cloned);
+            canvas.setActiveObject(cloned);
+            saveState();
+        });
+    }
+
+    function deleteObj() {
+        if(canvas.getActiveObject()) { canvas.remove(canvas.getActiveObject()); saveState(); }
+    }
+
+    function saveImg() {
+        const link = document.createElement('a');
+        link.download = 'design.png';
+        link.href = canvas.toDataURL({ multiplier: 2 });
+        link.click();
+        isChanged = false;
+    }
+
+    function renderLayers() {
+        const list = document.getElementById('layers-list');
+        list.innerHTML = '';
+        canvas.getObjects().slice().reverse().forEach((obj) => {
+            const div = document.createElement('div');
+            div.className = 'layer-item';
+            div.dataset.id = canvas.getObjects().indexOf(obj);
+            div.innerHTML = `
+                <div style="background: #2563eb; padding: 2px 8px; border-radius: 4px; margin-left: 10px;">${canvas.getObjects().indexOf(obj)+1}</div>
+                <div class="layer-preview">${obj.text || '🧩'}</div>
+            `;
+            div.onclick = () => { canvas.setActiveObject(obj); canvas.renderAll(); };
+            list.appendChild(div);
+        });
+    }
+
+    new Sortable(document.getElementById('layers-list'), {
+        animation: 150,
+        onEnd: () => {
+            const items = document.querySelectorAll('.layer-item');
+            const newOrder = Array.from(items).map(i => parseInt(i.dataset.id)).reverse();
+            const objs = canvas.getObjects();
+            const bg = canvas.backgroundColor;
+            const reordered = newOrder.map(idx => objs[idx]);
+            canvas.clear();
+            canvas.setBackgroundColor(bg, canvas.renderAll.bind(canvas));
+            reordered.forEach(o => canvas.add(o));
+            canvas.renderAll();
+            saveState();
+        }
+    });
+
+    canvas.on('object:added', renderLayers);
+    canvas.on('object:removed', renderLayers);
+</script>
+
+</body>
+</html>

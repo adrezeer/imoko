@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الإيموجي - صيغة IMOKO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --menu-bg: #0f172a; 
+            --menu-text: #e2e8f0;
+            --canvas-bg-area: #1e293b;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --hover-bg: #334155;
+            --border-color: #334155;
+            --primary-color: #2563eb;
+            --sidebar-width: 170px;
+        }
+
+        /* السمات المحددة مسبقاً */
+        [data-theme="dark"] {
+            --menu-bg: #0f172a; 
+            --menu-text: #e2e8f0;
+            --canvas-bg-area: #1e293b;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --hover-bg: #334155;
+            --border-color: #334155;
+            --primary-color: #2563eb;
+        }
+
+        [data-theme="light"] {
+            --menu-bg: #f8fafc; 
+            --menu-text: #1e293b;
+            --canvas-bg-area: #e2e8f0;
+            --sidebar-bg: rgba(248, 250, 252, 0.95);
+            --hover-bg: #e2e8f0;
+            --border-color: #cbd5e1;
+            --primary-color: #3b82f6;
+        }
+
+        [data-theme="ocean"] {
+            --menu-bg: #0c4a6e; 
+            --menu-text: #e0f2fe;
+            --canvas-bg-area: #075985;
+            --sidebar-bg: rgba(12, 74, 110, 0.9);
+            --hover-bg: #0e7490;
+            --border-color: #0e7490;
+            --primary-color: #06b6d4;
+        }
+
+        [data-theme="sunset"] {
+            --menu-bg: #7c2d12; 
+            --menu-text: #fed7aa;
+            --canvas-bg-area: #9a3412;
+            --sidebar-bg: rgba(124, 45, 18, 0.9);
+            --hover-bg: #b45309;
+            --border-color: #b45309;
+            --primary-color: #f97316;
+        }
+
+        [data-theme="forest"] {
+            --menu-bg: #14532d; 
+            --menu-text: #d1fae5;
+            --canvas-bg-area: #166534;
+            --sidebar-bg: rgba(20, 83, 45, 0.9);
+            --hover-bg: #15803d;
+            --border-color: #15803d;
+            --primary-color: #10b981;
+        }
+
+        [data-theme="purple"] {
+            --menu-bg: #4c1d95; 
+            --menu-text: #e9d5ff;
+            --canvas-bg-area: #5b21b6;
+            --sidebar-bg: rgba(76, 29, 149, 0.9);
+            --hover-bg: #6d28d9;
+            --border-color: #6d28d9;
+            --primary-color: #a855f7;
+        }
+
+        [data-theme="rose"] {
+            --menu-bg: #881337; 
+            --menu-text: #fce7f3;
+            --canvas-bg-area: #9f1239;
+            --sidebar-bg: rgba(136, 19, 55, 0.9);
+            --hover-bg: #be123c;
+            --border-color: #be123c;
+            --primary-color: #f43f5e;
+        }
+
+        body { display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--canvas-bg-area); color: var(--menu-text); overflow: hidden; transition: background 0.3s, color 0.3s; }
+
+        /* تنسيق الشريط العلوي */
+        #top-menu {
+            height: 50px; background: var(--menu-bg); display: flex; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid var(--border-color); gap: 25px; z-index: 1000;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* تحويل الشريط لجانبي في الموبايل */
+        @media (max-width: 768px) {
+            #top-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: var(--sidebar-width);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding: 40px 5px;
+                transform: translateX(100%);
+                border-bottom: none;
+                border-left: 1px solid rgba(255,255,255,0.1);
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+                gap: 15px;
+            }
+
+            #top-menu.active-sidebar {
+                transform: translateX(0);
+            }
+
+            .logo { margin-bottom: 20px; font-size: 20px; }
+            .menu-item { width: 90%; font-size: 13px; text-align: center; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            
+            .dropdown {
+                top: 0 !important;
+                right: 100% !important;
+                border-radius: 8px 0 0 8px !important;
+                min-width: 140px !important;
+            }
+            
+            .btn-main-add { font-size: 12px; padding: 10px 5px; width: 90%; }
+            #layers-panel { display: none; }
+            #canvas-area { padding: 10px; }
+        }
+
+        .logo { font-size: 24px; margin-left: 10px; cursor: default; }
+
+        .menu-item { position: relative; cursor: pointer; font-size: 15px; font-weight: 500; padding: 5px 10px; border-radius: 5px; transition: 0.2s; }
+        .menu-item:hover { background: var(--hover-bg); }
+        
+        .dropdown {
+            display: none; position: absolute; top: 100%; right: 0; background: var(--menu-bg);
+            min-width: 200px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border-radius: 0 0 8px 8px;
+            border: 1px solid var(--border-color); padding: 10px 0; z-index: 1001;
+        }
+        .menu-item:hover .dropdown { display: block; }
+
+        .dropdown-item { 
+            padding: 10px 20px; display: flex; align-items: center; gap: 10px; 
+            transition: 0.2s; white-space: nowrap; cursor: pointer; 
+        }
+        .dropdown-item:hover { background: var(--hover-bg); }
+        .dropdown-item input[type="number"], .dropdown-item input[type="color"] { 
+            width: 60px; background: var(--canvas-bg-area); border: 1px solid var(--border-color); 
+            color: var(--menu-text); border-radius: 4px; padding: 2px 5px; 
+        }
+
+        /* استايل خاص لعينات السمات */
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .theme-option:hover {
+            background: var(--hover-bg);
+        }
+        .theme-preview {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--border-color);
+        }
+        .theme-option.active {
+            background: var(--hover-bg);
+            font-weight: bold;
+        }
+
+        /* استايل لمنزلقات الألوان المخصصة */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+        }
+        .color-row label {
+            flex: 1;
+            font-size: 13px;
+        }
+        .color-row input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #main-workspace { display: flex; flex-grow: 1; position: relative; overflow: hidden; }
+        #canvas-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 40px; overflow: auto; cursor: pointer; }
+        #canvas-wrapper { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); line-height: 0; background: white; border-radius: 4px; cursor: default; }
+
+        #layers-panel {
+            width: 220px; background: var(--sidebar-bg); backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column;
+            transition: background 0.3s;
+        }
+
+        /* تحديث قائمة الطبقات لتدعم التمرير والنشاط */
+        #layers-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        #layers-list::-webkit-scrollbar { width: 5px; }
+        #layers-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        .layer-item {
+            display: flex; align-items: center; background: var(--hover-bg); border-radius: 8px;
+            margin-bottom: 8px; padding: 8px; cursor: grab; font-size: 14px;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .layer-item.active-layer { border-color: var(--primary-color); background: var(--sidebar-bg); }
+        .layer-preview { margin-right: auto; font-size: 18px; }
+
+        .btn-main-add { 
+            background: var(--primary-color); color: white; border: none; 
+            padding: 5px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; 
+            transition: background 0.3s;
+        }
+        .btn-main-add:hover { opacity: 0.9; }
+
+        #emoji-picker-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; box-shadow: 0 20px 25px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body onclick="closeSidebar(event)" data-theme="dark">
+
+<header id="top-menu">
+    <div class="logo">😍</div>
+    
+    <div class="menu-item">
+        ملف (File)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="saveImg()">💾 حفظ الصورة (PNG)</div>
+            <div class="dropdown-item" onclick="saveProject()">📤 حفظ كملف (.imoko)</div>
+            <div class="dropdown-item" onclick="document.getElementById('importFile').click()">📥 فتح مشروع (.imoko)</div>
+            <div class="dropdown-item" onclick="newProject()">✨ مشروع جديد</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        تعديل (Edit)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="undo()">↩️ تراجع</div>
+            <div class="dropdown-item" onclick="redo()">↪️ إعادة</div>
+            <div class="dropdown-item" onclick="duplicateObject()">📄 تكرار العنصر</div>
+            <div class="dropdown-item" onclick="deleteObj()" style="color: #ef4444;">❌ حذف المختار</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        عرض (View)
+        <div class="dropdown">
+            <div class="dropdown-item">عرض: <input type="number" id="canvas-width" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">طول: <input type="number" id="canvas-height" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">الخلفية: <input type="color" id="canvas-bg" value="#ffffff" onchange="applySettings()"></div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+         المظهر (Theme)
+        <div class="dropdown" style="max-height: 400px; overflow-y: auto;">
+            <div style="padding: 5px 20px; font-size: 12px; color: #94a3b8; border-bottom: 1px solid var(--border-color);">سمات جاهزة</div>
+            
+            <div class="theme-option" onclick="changeTheme('dark')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #0f172a 50%, #1e293b 50%);"></div>
+                <span>🌙 داكن (Dark)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('light')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #f8fafc 50%, #e2e8f0 50%);"></div>
+                <span>☀️ فاتح (Light)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('ocean')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #0c4a6e 50%, #075985 50%);"></div>
+                <span>🌊 محيط (Ocean)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('sunset')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #7c2d12 50%, #9a3412 50%);"></div>
+                <span>🌅 غروب (Sunset)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('forest')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #14532d 50%, #166534 50%);"></div>
+                <span>🌲 غابة (Forest)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('purple')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #4c1d95 50%, #5b21b6 50%);"></div>
+                <span>💜 بنفسجي (Purple)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('rose')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #881337 50%, #9f1239 50%);"></div>
+                <span>🌹 وردي (Rose)</span>
+            </div>
+
+            <div style="padding: 8px 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 5px;">ألوان مخصصة</div>
+            
+            <div class="color-row">
+                <label>لون القائمة</label>
+                <input type="color" id="custom-menu-bg" value="#0f172a" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون النص</label>
+                <input type="color" id="custom-menu-text" value="#e2e8f0" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون الخلفية</label>
+                <input type="color" id="custom-canvas-bg" value="#1e293b" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون التمييز</label>
+                <input type="color" id="custom-hover-bg" value="#334155" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>اللون الأساسي</label>
+                <input type="color" id="custom-primary" value="#2563eb" onchange="applyCustomColors()">
+            </div>
+
+            <div class="dropdown-item" onclick="resetTheme()" style="border-top: 1px solid var(--border-color); margin-top: 5px; color: #94a3b8;">
+                🔄 إعادة تعيين للوضع الافتراضي
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        ترتيب (Selection)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="flipObject()">↔️ قلب أفقي</div>
+        </div>
+    </div>
+
+    <button class="btn-main-add" onclick="toggleEmojiPicker()">+ إضافة إيموجي</button>
+    <input type="file" id="importFile" style="display:none" accept=".imoko" onchange="importProject(event)">
+</header>
+
+<div id="main-workspace">
+    <aside id="layers-panel">
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الطبقات (اسحب للترتيب)</p>
+        <div id="layers-list"></div>
+    </aside>
+
+    <main id="canvas-area" onclick="toggleSidebar(event)">
+        <div id="canvas-wrapper" onclick="event.stopPropagation()">
+            <canvas id="smartCanvas"></canvas>
+        </div>
+    </main>
+</div>
+
+<div id="emoji-picker-container"></div>
+
+<script>
+    const canvas = new fabric.Canvas('smartCanvas', { width: 500, height: 500, backgroundColor: '#ffffff' });
+    let history = [JSON.stringify(canvas)];
+    let redoStack = [];
+    let isChanged = false;
+
+    // --- وظائف إدارة السمات ---
+    function changeTheme(themeName) {
+        document.body.setAttribute('data-theme', themeName);
+        localStorage.setItem('selectedTheme', themeName);
+        updateActiveTheme(themeName);
+    }
+
+    function updateActiveTheme(themeName) {
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            if (option.textContent.includes(themeName === 'dark' ? 'داكن' : 
+                themeName === 'light' ? 'فاتح' : 
+                themeName === 'ocean' ? 'محيط' : 
+                themeName === 'sunset' ? 'غروب' : 
+                themeName === 'forest' ? 'غابة' : 
+                themeName === 'purple' ? 'بنفسجي' : 
+                themeName === 'rose' ? 'وردي' : '')) {
+                option.classList.add('active');
+            }
+        });
+    }
+
+    function applyCustomColors() {
+        const menuBg = document.getElementById('custom-menu-bg').value;
+        const menuText = document.getElementById('custom-menu-text').value;
+        const canvasBg = document.getElementById('custom-canvas-bg').value;
+        const hoverBg = document.getElementById('custom-hover-bg').value;
+        const primary = document.getElementById('custom-primary').value;
+
+        document.documentElement.style.setProperty('--menu-bg', menuBg);
+        document.documentElement.style.setProperty('--menu-text', menuText);
+        document.documentElement.style.setProperty('--canvas-bg-area', canvasBg);
+        document.documentElement.style.setProperty('--hover-bg', hoverBg);
+        document.documentElement.style.setProperty('--primary-color', primary);
+        document.documentElement.style.setProperty('--border-color', hoverBg);
+        document.documentElement.style.setProperty('--sidebar-bg', `${menuBg}cc`);
+
+        localStorage.setItem('customTheme', JSON.stringify({
+            menuBg, menuText, canvasBg, hoverBg, primary
+        }));
+        
+        document.body.removeAttribute('data-theme');
+        updateActiveTheme('custom');
+    }
+
+    function resetTheme() {
+        changeTheme('dark');
+        document.getElementById('custom-menu-bg').value = '#0f172a';
+        document.getElementById('custom-menu-text').value = '#e2e8f0';
+        document.getElementById('custom-canvas-bg').value = '#1e293b';
+        document.getElementById('custom-hover-bg').value = '#334155';
+        document.getElementById('custom-primary').value = '#2563eb';
+        localStorage.removeItem('customTheme');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('selectedTheme');
+        const customTheme = localStorage.getItem('customTheme');
+        
+        if (customTheme) {
+            const colors = JSON.parse(customTheme);
+            document.getElementById('custom-menu-bg').value = colors.menuBg;
+            document.getElementById('custom-menu-text').value = colors.menuText;
+            document.getElementById('custom-canvas-bg').value = colors.canvasBg;
+            document.getElementById('custom-hover-bg').value = colors.hoverBg;
+            document.getElementById('custom-primary').value = colors.primary;
+            applyCustomColors();
+        } else if (savedTheme) {
+            changeTheme(savedTheme);
+        } else {
+            updateActiveTheme('dark');
+        }
+    });
+
+    // --- وظائف الموبايل ---
+    function toggleSidebar(e) {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.toggle('active-sidebar');
+            e.stopPropagation();
+        }
+    }
+
+    function closeSidebar(e) {
+        if (window.innerWidth <= 768) {
+            const menu = document.getElementById('top-menu');
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('active-sidebar');
+            }
+        }
+    }
+
+    canvas.on('mouse:down', () => {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    });
+
+    window.onbeforeunload = function() {
+        if (isChanged) return "لديك عمل لم يتم حفظه، هل أنت متأكد من المغادرة؟";
+    };
+
+    function saveState() {
+        history.push(JSON.stringify(canvas));
+        if (history.length > 20) history.shift();
+        redoStack = [];
+        isChanged = true;
+    }
+
+    // --- وظائف التعديل والكانفاس ---
+    function saveProject() {
+        const json = JSON.stringify(canvas.toJSON());
+        const blob = new Blob([json], { type: "application/json" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "design.imoko";
+        link.click();
+        isChanged = false;
+    }
+
+    function importProject(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            canvas.loadFromJSON(e.target.result, () => {
+                canvas.renderAll();
+                renderLayers();
+                saveState();
+                isChanged = false;
+            });
+        };
+        reader.readAsText(file);
+    }
+
+    function newProject() {
+        if (isChanged && !confirm("هل تريد البدء من جديد؟ ستفقد التغييرات غير المحفوظة.")) return;
+        location.reload();
+    }
+
+    function applySettings() {
+        const w = parseInt(document.getElementById('canvas-width').value);
+        const h = parseInt(document.getElementById('canvas-height').value);
+        const bg = document.getElementById('canvas-bg').value;
+        canvas.setWidth(w); canvas.setHeight(h);
+        canvas.setBackgroundColor(bg, canvas.renderAll.bind(canvas));
+        saveState();
+    }
+
+    const picker = new EmojiMart.Picker({
+        onEmojiSelect: (emoji) => { addEmoji(emoji.native); toggleEmojiPicker(); },
+        locale: 'ar', theme: 'dark'
+    });
+    document.getElementById('emoji-picker-container').appendChild(picker);
+
+    function toggleEmojiPicker() {
+        const p = document.getElementById('emoji-picker-container');
+        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        if (p.style.display === 'block' && window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    }
+
+    function addEmoji(emoji) {
+        const text = new fabric.Text(emoji, { left: canvas.width/2 - 40, top: canvas.height/2 - 40, fontSize: 80 });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        saveState();
+    }
+
+    function undo() {
+        if (history.length <= 1) return;
+        redoStack.push(history.pop());
+        canvas.loadFromJSON(history[history.length - 1], () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop(); history.push(state);
+        canvas.loadFromJSON(state, () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function flipObject() {
+        const active = canvas.getActiveObject();
+        if (active) { active.set('flipX', !active.flipX); canvas.renderAll(); saveState(); }
+    }
+
+    function duplicateObject() {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        active.clone((cloned) => {
+            cloned.set({ left: cloned.left + 20, top: cloned.top + 20 });
+            canvas.add(cloned);
+            canvas.setActiveObject(cloned);
+            saveState();
+        });
+    }
+
+    function deleteObj() {
+        if(canvas.getActiveObject()) { canvas.remove(canvas.getActiveObject()); saveState(); }
+    }
+
+    function saveImg() {
+        const link = document.createElement('a');
+        link.download = 'design.png';
+        link.href = canvas.toDataURL({ multiplier: 2 });
+        link.click();
+        isChanged = false;
+    }
+
+    // --- وظائف الطبقات المحسنة ---
+    function renderLayers() {
+        const list = document.getElementById('layers-list');
+        list.innerHTML = '';
+        const objects = canvas.getObjects();
+        const activeObj = canvas.getActiveObject();
+
+        objects.slice().reverse().forEach((obj) => {
+            const index = objects.indexOf(obj);
+            const div = document.createElement('div');
+            div.className = 'layer-item' + (obj === activeObj ? ' active-layer' : '');
+            div.dataset.id = index;
+            div.innerHTML = `
+                <div style="background: var(--primary-color); padding: 2px 8px; border-radius: 4px; margin-left: 10px; color: white; font-size:10px;">${index + 1}</div>
+                <div class="layer-preview">${obj.text || '🧩'}</div>
+            `;
+            div.onclick = () => { canvas.setActiveObject(obj); canvas.renderAll(); renderLayers(); };
+            list.appendChild(div);
+        });
+    }
+
+    new Sortable(document.getElementById('layers-list'), {
+        animation: 150,
+        onEnd: () => {
+            const items = document.querySelectorAll('.layer-item');
+            const newOrder = Array.from(items).map(i => parseInt(i.dataset.id)).reverse();
+            const objs = canvas.getObjects();
+            
+            // إعادة ترتيب الطبقات دون حذفها لتجنب الوميض أو الاختفاء
+            newOrder.forEach((oldIdx, newIdx) => {
+                objs[oldIdx].moveTo(newIdx);
+            });
+            
+            canvas.renderAll();
+            saveState();
+            renderLayers();
+        }
+    });
+
+    // ربط الأحداث لتحديث قائمة الطبقات تلقائياً
+    canvas.on({
+        'selection:created': renderLayers,
+        'selection:updated': renderLayers,
+        'selection:cleared': renderLayers,
+        'object:added': renderLayers,
+        'object:removed': renderLayers,
+        'object:modified': renderLayers
+    });
+</script>
+
+</body>
+</html>
