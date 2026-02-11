@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>imoko | عالم إيموجياتك</title>
+    <title>imoko | رحلة الإبداع</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-dark: #1e293b;
+            --bg-dark: #0b0f19;
+            --card-bg: #161b22;
             --accent-pink: #f472b6;
-            --accent-purple: #a78bfa;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --anime-cyan: #00f2ff;
+            --text-main: #e6edf3;
+            --text-muted: #8b949e;
         }
 
         body {
@@ -19,127 +19,128 @@
             background-color: var(--bg-dark);
             color: var(--text-main);
             margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
         .header {
             text-align: center;
-            padding: 60px 20px 40px;
+            margin-bottom: 50px;
         }
 
         .logo {
-            font-size: 80px;
-            filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.4));
-            margin-bottom: 20px;
-            display: inline-block;
+            font-size: 70px;
+            text-shadow: 0 0 20px rgba(244, 114, 182, 0.5);
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 3rem;
             margin: 10px 0;
-            background: linear-gradient(to left, var(--accent-pink), var(--accent-purple));
+            background: linear-gradient(45deg, var(--accent-pink), #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
         }
 
-        .description {
-            max-width: 600px;
+        .main-desc {
             color: var(--text-muted);
-            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 0 auto 30px;
             line-height: 1.6;
-            margin-bottom: 40px;
         }
 
         .container {
-            width: 90%;
-            max-width: 700px;
+            width: 100%;
+            max-width: 800px;
         }
 
         .version-card {
-            background: var(--card-dark);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 25px 35px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #30363d;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
         }
 
-        .version-card:hover {
-            transform: scale(1.02);
-            border-color: var(--accent-pink);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        /* --- تصميم إصدار الأنمي 5.4 --- */
+        .v-5-4 {
+            border: 2px solid var(--anime-cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        }
+        .v-5-4::after {
+            content: "ANIME UPDATE";
+            position: absolute;
+            top: 10px;
+            left: -30px;
+            background: var(--anime-cyan);
+            color: #000;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 5px 40px;
+            transform: rotate(-45deg);
+        }
+
+        /* --- تصميم الإصدار الأول (عادي) --- */
+        .v-1-0 {
+            opacity: 0.8;
+            filter: grayscale(0.5);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
         }
 
         .version-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .badge {
-            background: rgba(244, 114, 182, 0.1);
-            color: var(--accent-pink);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-right: 10px;
+        .version-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-left: 20px;
         }
 
         .actions {
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .btn {
-            padding: 12px 24px;
-            border-radius: 14px;
+            padding: 10px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: 0.3s;
         }
 
-        .btn-download {
-            background: transparent;
-            border: 2px solid var(--accent-purple);
-            color: var(--accent-purple);
-        }
+        .btn-run { background: var(--accent-pink); color: white; }
+        .btn-run:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(244, 114, 182, 0.4); }
+        
+        .btn-download { background: #30363d; color: white; border: 1px solid #8b949e; }
+        .btn-download:hover { background: #484f58; }
 
-        .btn-download:hover {
-            background: var(--accent-purple);
-            color: white;
-        }
-
-        .btn-run {
-            background: var(--accent-pink);
-            color: white;
-        }
-
-        .btn-run:hover {
-            background: #db2777;
-            box-shadow: 0 0 15px rgba(244, 114, 182, 0.4);
+        /* ميزانية 5.4 الخاصة بالأنمي */
+        .v-5-4 .btn-run {
+            background: var(--anime-cyan);
+            color: #000;
         }
 
         footer {
-            margin-top: auto;
-            padding: 40px;
+            margin-top: 50px;
             color: var(--text-muted);
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .open-source-tag {
-            color: #10b981;
-            font-weight: bold;
+            font-size: 0.8rem;
         }
     </style>
 </head>
@@ -148,16 +149,30 @@
     <header class="header">
         <div class="logo">😍</div>
         <h1>imoko</h1>
-        <div class="description">
-            برنامج <span style="color: white;">مفتوح المصدر</span> يمنحك القوة لصنع لوحات فنية احترافية باستخدام **الإيموجيات فقط**. ابدأ إبداعك الآن!
-        </div>
+        <p class="main-desc">برنامج مفتوح المصدر لصنع لوحات احترافية بالإيموجيات فقط.</p>
     </header>
 
     <div class="container">
+        
+        <div class="version-card v-5-4">
+            <div class="version-header">
+                <div>
+                    <div class="version-title" style="color: var(--anime-cyan);">imoko 5.4</div>
+                    <div class="version-desc">إصدار الأنمي المنتظر! إضافة نظام **الأنيميشن (Animation)** و **الكي فريم (Keyframes)** لصنع لوحات متحركة مبهرة.</div>
+                </div>
+            </div>
+            <div class="actions">
+                <a href="5.4.html" class="btn btn-download" download>Download</a>
+                <a href="5.4.html" class="btn btn-run">Run (Neo Anime)</a>
+            </div>
+        </div>
+
         <div class="version-card">
-            <div class="version-title">
-                imoko 5.3 
-                <span class="badge">الأحدث</span>
+            <div class="version-header">
+                <div>
+                    <div class="version-title">imoko 5.3</div>
+                    <div class="version-desc">تحديث ضخم! إضافة **قائمة الخصائص** الشاملة وإمكانية **إضافة النصوص** بجانب الإيموجيات للتحكم الكامل.</div>
+                </div>
             </div>
             <div class="actions">
                 <a href="5.3.html" class="btn btn-download" download>Download</a>
@@ -166,25 +181,35 @@
         </div>
 
         <div class="version-card">
-            <div class="version-title">imoko 2.0</div>
+            <div class="version-header">
+                <div>
+                    <div class="version-title">imoko 2.0</div>
+                    <div class="version-desc">تحديث المظهر! تم في هذا الإصدار إضافة نظام **الثيمات (Themes)** المتعددة لتخصيص واجهة البرنامج.</div>
+                </div>
+            </div>
             <div class="actions">
                 <a href="2.0.html" class="btn btn-download" download>Download</a>
                 <a href="2.0.html" class="btn btn-run">Run</a>
             </div>
         </div>
 
-        <div class="version-card">
-            <div class="version-title">imoko 1.0</div>
+        <div class="version-card v-1-0">
+            <div class="version-header">
+                <div>
+                    <div class="version-title">imoko 1.0</div>
+                    <div class="version-desc">التحديث الأول والانطلاقة الأساسية للبرنامج. بسيط، سريع، وبدون إضافات معقدة.</div>
+                </div>
+            </div>
             <div class="actions">
                 <a href="1.0.html" class="btn btn-download" download>Download</a>
                 <a href="1.0.html" class="btn btn-run">Run</a>
             </div>
         </div>
+
     </div>
 
     <footer>
-        صنع بكل 😍 - <span class="open-source-tag">مفتوح المصدر دائمًا</span> <br>
-        2026 جميع الحقوق محفوظة
+        جميع الحقوق محفوظة 😍 imoko 2026 | مخصص للمبدعين
     </footer>
 
 </body>
