@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>imoko | Versions</title>
+    <title>imoko | عالم إيموجياتك</title>
     <style>
         :root {
-            --primary: #ff4d6d;
-            --secondary: #7209b7;
-            --accent: #4cc9f0;
-            --bg: #f0f2f5;
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --accent-pink: #f472b6;
+            --accent-purple: #a78bfa;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -24,123 +27,164 @@
 
         .header {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px 40px;
         }
 
         .logo {
-            font-size: 70px;
-            display: block;
-            margin-bottom: 10px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            font-size: 80px;
+            filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.4));
+            margin-bottom: 20px;
+            display: inline-block;
         }
 
         h1 {
-            color: var(--primary);
-            margin: 0;
-            font-size: 3rem;
-            letter-spacing: 3px;
+            font-size: 3.5rem;
+            margin: 10px 0;
+            background: linear-gradient(to left, var(--accent-pink), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .description {
+            max-width: 600px;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
         }
 
         .container {
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
         }
 
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px 30px;
+        .version-card {
+            background: var(--card-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 25px 35px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            border-right: 5px solid var(--primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .version-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #444;
+        .version-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-pink);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-group {
+        .version-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: rgba(244, 114, 182, 0.1);
+            color: var(--accent-pink);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .actions {
             display: flex;
-            gap: 12px;
+            gap: 15px;
         }
 
         .btn {
-            padding: 12px 25px;
-            border-radius: 12px;
+            padding: 12px 24px;
+            border-radius: 14px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .download {
-            background-color: var(--accent);
-            color: #000;
+        .btn-download {
+            background: transparent;
+            border: 2px solid var(--accent-purple);
+            color: var(--accent-purple);
         }
 
-        .run {
-            background-color: var(--secondary);
-            color: #fff;
+        .btn-download:hover {
+            background: var(--accent-purple);
+            color: white;
         }
 
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .btn-run {
+            background: var(--accent-pink);
+            color: white;
+        }
+
+        .btn-run:hover {
+            background: #db2777;
+            box-shadow: 0 0 15px rgba(244, 114, 182, 0.4);
         }
 
         footer {
             margin-top: auto;
-            padding: 30px;
-            color: #888;
+            padding: 40px;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .open-source-tag {
+            color: #10b981;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <span class="logo">😍</span>
+    <header class="header">
+        <div class="logo">😍</div>
         <h1>imoko</h1>
-    </div>
+        <div class="description">
+            برنامج <span style="color: white;">مفتوح المصدر</span> يمنحك القوة لصنع لوحات فنية احترافية باستخدام **الإيموجيات فقط**. ابدأ إبداعك الآن!
+        </div>
+    </header>
 
     <div class="container">
-        <div class="card">
-            <div class="version-name">imoko 1.0</div>
-            <div class="btn-group">
-                <a href="1.0.html" class="btn download" download>Download</a>
-                <a href="1.0.html" class="btn run">Run</a>
+        <div class="version-card">
+            <div class="version-title">
+                imoko 5.3 
+                <span class="badge">الأحدث</span>
+            </div>
+            <div class="actions">
+                <a href="5.3.html" class="btn btn-download" download>Download</a>
+                <a href="5.3.html" class="btn btn-run">Run</a>
             </div>
         </div>
 
-        <div class="card">
-            <div class="version-name">imoko 2.0</div>
-            <div class="btn-group">
-                <a href="2.0.htm" class="btn download" download>Download</a>
-                <a href="2.0.htm" class="btn run">Run</a>
+        <div class="version-card">
+            <div class="version-title">imoko 2.0</div>
+            <div class="actions">
+                <a href="2.0.html" class="btn btn-download" download>Download</a>
+                <a href="2.0.html" class="btn btn-run">Run</a>
             </div>
         </div>
 
-        <div class="card" style="border-right-color: var(--secondary);">
-            <div class="version-name">imoko 5.3 <span style="font-size: 0.8rem; color: var(--primary);">(Latest)</span></div>
-            <div class="btn-group">
-                <a href="5.3.html" class="btn download" download>Download</a>
-                <a href="5.3.html" class="btn run">Run</a>
+        <div class="version-card">
+            <div class="version-title">imoko 1.0</div>
+            <div class="actions">
+                <a href="1.0.html" class="btn btn-download" download>Download</a>
+                <a href="1.0.html" class="btn btn-run">Run</a>
             </div>
         </div>
     </div>
 
     <footer>
-        الموقع الرسمي لبرمجيات imoko 😍 2026
+        صنع بكل 😍 - <span class="open-source-tag">مفتوح المصدر دائمًا</span> <br>
+        2026 جميع الحقوق محفوظة
     </footer>
 
 </body>
