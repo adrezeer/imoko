@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>imoko | Versions</title>
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --secondary: #7209b7;
+            --accent: #4cc9f0;
+            --bg: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            font-size: 70px;
+            display: block;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 3rem;
+            letter-spacing: 3px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-right: 5px solid var(--primary);
+        }
+
+        .version-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .download {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        .run {
+            background-color: var(--secondary);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="logo">😍</span>
+        <h1>imoko</h1>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="version-name">imoko 1.0</div>
+            <div class="btn-group">
+                <a href="1.0.html" class="btn download" download>Download</a>
+                <a href="1.0.html" class="btn run">Run</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="version-name">imoko 2.0</div>
+            <div class="btn-group">
+                <a href="2.0.htm" class="btn download" download>Download</a>
+                <a href="2.0.htm" class="btn run">Run</a>
+            </div>
+        </div>
+
+        <div class="card" style="border-right-color: var(--secondary);">
+            <div class="version-name">imoko 5.3 <span style="font-size: 0.8rem; color: var(--primary);">(Latest)</span></div>
+            <div class="btn-group">
+                <a href="5.3.html" class="btn download" download>Download</a>
+                <a href="5.3.html" class="btn run">Run</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        الموقع الرسمي لبرمجيات imoko 😍 2026
+    </footer>
+
+</body>
+</html>
