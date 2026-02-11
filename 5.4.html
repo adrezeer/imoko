@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الإيموجي المتقدم - IMOKO Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --menu-bg: #0f172a; 
+            --menu-text: #e2e8f0;
+            --canvas-bg-area: #1e293b;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --hover-bg: #334155;
+            --border-color: #334155;
+            --primary-color: #2563eb;
+            --sidebar-width: 170px;
+        }
+
+        /* السمات المحددة مسبقاً */
+        [data-theme="dark"] {
+            --menu-bg: #0f172a; 
+            --menu-text: #e2e8f0;
+            --canvas-bg-area: #1e293b;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --hover-bg: #334155;
+            --border-color: #334155;
+            --primary-color: #2563eb;
+        }
+
+        [data-theme="light"] {
+            --menu-bg: #f8fafc; 
+            --menu-text: #1e293b;
+            --canvas-bg-area: #e2e8f0;
+            --sidebar-bg: rgba(248, 250, 252, 0.95);
+            --hover-bg: #e2e8f0;
+            --border-color: #cbd5e1;
+            --primary-color: #3b82f6;
+        }
+
+        [data-theme="ocean"] {
+            --menu-bg: #0c4a6e; 
+            --menu-text: #e0f2fe;
+            --canvas-bg-area: #075985;
+            --sidebar-bg: rgba(12, 74, 110, 0.9);
+            --hover-bg: #0e7490;
+            --border-color: #0e7490;
+            --primary-color: #06b6d4;
+        }
+
+        [data-theme="sunset"] {
+            --menu-bg: #7c2d12; 
+            --menu-text: #fed7aa;
+            --canvas-bg-area: #9a3412;
+            --sidebar-bg: rgba(124, 45, 18, 0.9);
+            --hover-bg: #b45309;
+            --border-color: #b45309;
+            --primary-color: #f97316;
+        }
+
+        [data-theme="forest"] {
+            --menu-bg: #14532d; 
+            --menu-text: #d1fae5;
+            --canvas-bg-area: #166534;
+            --sidebar-bg: rgba(20, 83, 45, 0.9);
+            --hover-bg: #15803d;
+            --border-color: #15803d;
+            --primary-color: #10b981;
+        }
+
+        [data-theme="purple"] {
+            --menu-bg: #4c1d95; 
+            --menu-text: #e9d5ff;
+            --canvas-bg-area: #5b21b6;
+            --sidebar-bg: rgba(76, 29, 149, 0.9);
+            --hover-bg: #6d28d9;
+            --border-color: #6d28d9;
+            --primary-color: #a855f7;
+        }
+
+        [data-theme="rose"] {
+            --menu-bg: #881337; 
+            --menu-text: #fce7f3;
+            --canvas-bg-area: #9f1239;
+            --sidebar-bg: rgba(136, 19, 55, 0.9);
+            --hover-bg: #be123c;
+            --border-color: #be123c;
+            --primary-color: #f43f5e;
+        }
+
+        body { display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--canvas-bg-area); color: var(--menu-text); overflow: hidden; transition: background 0.3s, color 0.3s; }
+
+        /* تنسيق الشريط العلوي */
+        #top-menu {
+            height: 50px; background: var(--menu-bg); display: flex; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid var(--border-color); gap: 25px; z-index: 1000;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* تحويل الشريط لجانبي في الموبايل */
+        @media (max-width: 768px) {
+            #top-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: var(--sidebar-width);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding: 40px 5px;
+                transform: translateX(100%);
+                border-bottom: none;
+                border-left: 1px solid rgba(255,255,255,0.1);
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+                gap: 15px;
+            }
+
+            #top-menu.active-sidebar {
+                transform: translateX(0);
+            }
+
+            .logo { margin-bottom: 20px; font-size: 20px; }
+            .menu-item { width: 90%; font-size: 13px; text-align: center; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            
+            .dropdown {
+                top: 0 !important;
+                right: 100% !important;
+                border-radius: 8px 0 0 8px !important;
+                min-width: 140px !important;
+            }
+            
+            .btn-main-add { font-size: 12px; padding: 10px 5px; width: 90%; }
+            #layers-panel { display: none; }
+            #canvas-area { padding: 10px; }
+            #properties-panel { display: none; }
+        }
+
+        .logo { font-size: 24px; margin-left: 10px; cursor: default; }
+
+        .menu-item { position: relative; cursor: pointer; font-size: 15px; font-weight: 500; padding: 5px 10px; border-radius: 5px; transition: 0.2s; }
+        .menu-item:hover { background: var(--hover-bg); }
+        
+        .dropdown {
+            display: none; position: absolute; top: 100%; right: 0; background: var(--menu-bg);
+            min-width: 200px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border-radius: 0 0 8px 8px;
+            border: 1px solid var(--border-color); padding: 10px 0; z-index: 1001;
+        }
+        .menu-item:hover .dropdown { display: block; }
+
+        .dropdown-item { 
+            padding: 10px 20px; display: flex; align-items: center; gap: 10px; 
+            transition: 0.2s; white-space: nowrap; cursor: pointer; 
+        }
+        .dropdown-item:hover { background: var(--hover-bg); }
+        .dropdown-item input[type="number"], .dropdown-item input[type="color"] { 
+            width: 60px; background: var(--canvas-bg-area); border: 1px solid var(--border-color); 
+            color: var(--menu-text); border-radius: 4px; padding: 2px 5px; 
+        }
+
+        /* استايل خاص لعينات السمات */
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .theme-option:hover {
+            background: var(--hover-bg);
+        }
+        .theme-preview {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--border-color);
+        }
+        .theme-option.active {
+            background: var(--hover-bg);
+            font-weight: bold;
+        }
+
+        /* استايل لمنزلقات الألوان المخصصة */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+        }
+        .color-row label {
+            flex: 1;
+            font-size: 13px;
+        }
+        .color-row input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #main-workspace { display: flex; flex-grow: 1; position: relative; overflow: hidden; }
+        #canvas-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 40px; overflow: auto; cursor: pointer; }
+        #canvas-wrapper { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); line-height: 0; background: white; border-radius: 4px; cursor: default; position: relative; }
+
+        #layers-panel {
+            width: 220px; background: var(--sidebar-bg); backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column;
+            transition: background 0.3s;
+        }
+
+        /* لوحة الخصائص الجديدة */
+        #properties-panel {
+            width: 260px; background: var(--sidebar-bg); backdrop-filter: blur(10px);
+            border-left: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column;
+            transition: background 0.3s; overflow-y: auto;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .property-group:last-child {
+            border-bottom: none;
+        }
+
+        .property-title {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .property-control label {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .property-control input[type="range"] {
+            flex: 2;
+            accent-color: var(--primary-color);
+        }
+
+        .property-control input[type="number"] {
+            width: 60px;
+            background: var(--canvas-bg-area);
+            border: 1px solid var(--border-color);
+            color: var(--menu-text);
+            border-radius: 4px;
+            padding: 4px 8px;
+            text-align: center;
+        }
+
+        .property-control button {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            color: var(--menu-text);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 12px;
+        }
+
+        .property-control button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* تحديث قائمة الطبقات لتدعم التمرير والنشاط */
+        #layers-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        #layers-list::-webkit-scrollbar { width: 5px; }
+        #layers-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        .layer-item {
+            display: flex; align-items: center; background: var(--hover-bg); border-radius: 8px;
+            margin-bottom: 8px; padding: 8px; cursor: grab; font-size: 14px;
+            transition: all 0.2s; border: 1px solid transparent; position: relative;
+        }
+        .layer-item.active-layer { border-color: var(--primary-color); background: var(--sidebar-bg); }
+        .layer-item.locked { opacity: 0.6; }
+        .layer-preview { margin-right: auto; font-size: 18px; }
+        .layer-lock-btn {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+            color: var(--menu-text);
+            margin-right: 5px;
+        }
+        .layer-lock-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .btn-main-add { 
+            background: var(--primary-color); color: white; border: none; 
+            padding: 5px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; 
+            transition: background 0.3s;
+        }
+        .btn-main-add:hover { opacity: 0.9; }
+
+        #emoji-picker-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; box-shadow: 0 20px 25px rgba(0,0,0,0.5); }
+
+        /* أدوات التكبير */
+        #zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        #zoom-controls.compact {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        #zoom-controls.compact .zoom-btn,
+        #zoom-controls.compact .zoom-level {
+            display: none;
+        }
+
+        #zoom-controls.compact::before {
+            content: '🔍';
+            font-size: 20px;
+        }
+
+        #zoom-controls:not(.compact)::before {
+            display: none;
+        }
+
+        .zoom-btn {
+            background: var(--hover-bg);
+            border: none;
+            color: var(--menu-text);
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .zoom-level {
+            font-size: 13px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* مؤشر اختصارات لوحة المفاتيح */
+        #keyboard-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 250px;
+            font-size: 12px;
+            line-height: 1.6;
+            z-index: 100;
+        }
+
+        .kbd {
+            background: var(--hover-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Timeline و Animation Panel */
+        #animation-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            transition: transform 0.3s;
+        }
+
+        #animation-panel.hidden {
+            transform: translateY(100%);
+        }
+
+        #animation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--menu-bg);
+        }
+
+        #animation-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .anim-btn {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            color: var(--menu-text);
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 35px;
+        }
+
+        .anim-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .anim-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #timeline-container {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        #timeline {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            background: var(--canvas-bg-area);
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--menu-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+        }
+
+        .timeline-second {
+            min-width: 100px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--menu-text);
+            position: relative;
+        }
+
+        .timeline-second::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+
+        #playhead {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: red;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .playhead-handle {
+            position: absolute;
+            top: 0;
+            left: -6px;
+            width: 14px;
+            height: 30px;
+            background: red;
+            cursor: ew-resize;
+            pointer-events: all;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+        }
+
+        .object-track {
+            min-height: 40px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+
+        .track-label {
+            position: sticky;
+            left: 0;
+            background: var(--sidebar-bg);
+            padding: 5px 10px;
+            font-size: 12px;
+            border-right: 1px solid var(--border-color);
+            min-width: 120px;
+            z-index: 5;
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--primary-color);
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            z-index: 15;
+            transition: transform 0.1s;
+        }
+
+        .keyframe:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        .keyframe.selected {
+            background: #fbbf24;
+            border-color: #f59e0b;
+        }
+
+        #time-display {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--menu-text);
+            background: var(--canvas-bg-area);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .toggle-timeline-btn {
+            position: fixed;
+            bottom: 10px;
+            right: 250px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 60;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .toggle-timeline-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Stop Motion Mode */
+        .stop-motion-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 5px 10px;
+            background: var(--canvas-bg-area);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stop-motion-controls.active {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .capture-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .capture-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .capture-btn:active {
+            transform: scale(0.95);
+        }
+
+        .frame-counter {
+            font-family: monospace;
+            font-size: 13px;
+            color: var(--menu-text);
+            background: var(--hover-bg);
+            padding: 4px 10px;
+            border-radius: 4px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Easing Selection */
+        .easing-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--menu-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.5);
+            max-width: 400px;
+            display: none;
+        }
+
+        .easing-popup.visible {
+            display: block;
+        }
+
+        .easing-option {
+            padding: 12px 15px;
+            margin: 5px 0;
+            background: var(--hover-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid transparent;
+        }
+
+        .easing-option:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .easing-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .easing-preview {
+            width: 40px;
+            height: 30px;
+            background: var(--canvas-bg-area);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .easing-preview::after {
+            content: '●';
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 12px;
+            animation: var(--easing-animation, none);
+        }
+
+        @keyframes easeLinear { to { left: calc(100% - 12px); } }
+        @keyframes easeInOut { 
+            0% { left: 2px; }
+            50% { left: calc(100% - 12px); animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); }
+            100% { left: 2px; }
+        }
+        @keyframes easeBounce {
+            0%, 100% { left: 2px; }
+            50% { left: calc(100% - 12px); animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        }
+
+        .keyframe-connector {
+            position: absolute;
+            height: 2px;
+            background: var(--primary-color);
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .fps-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fps-selector label {
+            font-size: 12px;
+            color: var(--menu-text);
+        }
+
+        .fps-selector select {
+            background: var(--canvas-bg-area);
+            border: 1px solid var(--border-color);
+            color: var(--menu-text);
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body onclick="closeSidebar(event)" data-theme="dark">
+
+<header id="top-menu">
+    <div class="logo">😍 Pro</div>
+    
+    <div class="menu-item">
+        ملف (File)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="saveImg()">💾 حفظ الصورة (PNG)</div>
+            <div class="dropdown-item" onclick="saveProject()">📤 حفظ كملف (.imoko)</div>
+            <div class="dropdown-item" onclick="document.getElementById('importFile').click()">📥 فتح مشروع (.imoko)</div>
+            <div class="dropdown-item" onclick="document.getElementById('imageUpload').click()">🖼️ إضافة صورة</div>
+            <div class="dropdown-item" onclick="newProject()">✨ مشروع جديد</div>
+            <div class="dropdown-item" onclick="exportSVG()">📄 تصدير SVG</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        تعديل (Edit)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="undo()">↩️ تراجع <span class="kbd">Ctrl+Z</span></div>
+            <div class="dropdown-item" onclick="redo()">↪️ إعادة <span class="kbd">Ctrl+Y</span></div>
+            <div class="dropdown-item" onclick="duplicateObject()">📄 تكرار <span class="kbd">Ctrl+D</span></div>
+            <div class="dropdown-item" onclick="deleteObj()" style="color: #ef4444;">❌ حذف <span class="kbd">Del</span></div>
+            <div class="dropdown-item" onclick="selectAll()">🔲 تحديد الكل <span class="kbd">Ctrl+A</span></div>
+            <div class="dropdown-item" onclick="groupObjects()" style="border-top: 1px solid var(--border-color); margin-top: 5px;">📦 تجميع <span class="kbd">Ctrl+G</span></div>
+            <div class="dropdown-item" onclick="ungroupObjects()">📂 فك التجميع <span class="kbd">Ctrl+Shift+G</span></div>
+            <div class="dropdown-item" onclick="copyObject()" style="border-top: 1px solid var(--border-color); margin-top: 5px;">📋 نسخ <span class="kbd">Ctrl+C</span></div>
+            <div class="dropdown-item" onclick="pasteObject()">📌 لصق <span class="kbd">Ctrl+V</span></div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        عرض (View)
+        <div class="dropdown">
+            <div class="dropdown-item">عرض: <input type="number" id="canvas-width" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">طول: <input type="number" id="canvas-height" value="500" onchange="applySettings()"></div>
+            <div class="dropdown-item">الخلفية: <input type="color" id="canvas-bg" value="#ffffff" onchange="applySettings()"></div>
+            <div class="dropdown-item" onclick="toggleGrid()">📐 شبكة الإرشاد</div>
+            <div class="dropdown-item" onclick="resetZoom()">🔍 إعادة تعيين التكبير</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+         المظهر (Theme)
+        <div class="dropdown" style="max-height: 400px; overflow-y: auto;">
+            <div style="padding: 5px 20px; font-size: 12px; color: #94a3b8; border-bottom: 1px solid var(--border-color);">سمات جاهزة</div>
+            
+            <div class="theme-option" onclick="changeTheme('dark')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #0f172a 50%, #1e293b 50%);"></div>
+                <span>🌙 داكن (Dark)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('light')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #f8fafc 50%, #e2e8f0 50%);"></div>
+                <span>☀️ فاتح (Light)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('ocean')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #0c4a6e 50%, #075985 50%);"></div>
+                <span>🌊 محيط (Ocean)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('sunset')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #7c2d12 50%, #9a3412 50%);"></div>
+                <span>🌅 غروب (Sunset)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('forest')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #14532d 50%, #166534 50%);"></div>
+                <span>🌲 غابة (Forest)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('purple')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #4c1d95 50%, #5b21b6 50%);"></div>
+                <span>💜 بنفسجي (Purple)</span>
+            </div>
+            
+            <div class="theme-option" onclick="changeTheme('rose')">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #881337 50%, #9f1239 50%);"></div>
+                <span>🌹 وردي (Rose)</span>
+            </div>
+
+            <div style="padding: 8px 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 5px;">ألوان مخصصة</div>
+            
+            <div class="color-row">
+                <label>لون القائمة</label>
+                <input type="color" id="custom-menu-bg" value="#0f172a" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون النص</label>
+                <input type="color" id="custom-menu-text" value="#e2e8f0" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون الخلفية</label>
+                <input type="color" id="custom-canvas-bg" value="#1e293b" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>لون التمييز</label>
+                <input type="color" id="custom-hover-bg" value="#334155" onchange="applyCustomColors()">
+            </div>
+            
+            <div class="color-row">
+                <label>اللون الأساسي</label>
+                <input type="color" id="custom-primary" value="#2563eb" onchange="applyCustomColors()">
+            </div>
+
+            <div class="dropdown-item" onclick="resetTheme()" style="border-top: 1px solid var(--border-color); margin-top: 5px; color: #94a3b8;">
+                🔄 إعادة تعيين للوضع الافتراضي
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        ترتيب (Arrange)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="bringToFront()">⬆️ نقل للأمام</div>
+            <div class="dropdown-item" onclick="sendToBack()">⬇️ نقل للخلف</div>
+            <div class="dropdown-item" onclick="flipObject()">↔️ قلب أفقي</div>
+            <div class="dropdown-item" onclick="flipVertical()">↕️ قلب عمودي</div>
+            <div class="dropdown-item" onclick="alignLeft()">⬅️ محاذاة يسار</div>
+            <div class="dropdown-item" onclick="alignCenter()">↔️ محاذاة وسط</div>
+            <div class="dropdown-item" onclick="alignRight()">➡️ محاذاة يمين</div>
+        </div>
+    </div>
+
+    <div class="menu-item">
+        مساعدة (Help)
+        <div class="dropdown">
+            <div class="dropdown-item" onclick="toggleKeyboardHints()">⌨️ اختصارات لوحة المفاتيح</div>
+            <div class="dropdown-item" onclick="showAbout()">ℹ️ حول البرنامج</div>
+        </div>
+    </div>
+
+    <button class="btn-main-add" onclick="toggleEmojiPicker()">+ إيموجي</button>
+    <button class="btn-main-add" onclick="addText()" style="background: #10b981;">+ نص</button>
+    <input type="file" id="importFile" style="display:none" accept=".imoko" onchange="importProject(event)">
+    <input type="file" id="imageUpload" style="display:none" accept="image/*" onchange="uploadImage(event)">
+</header>
+
+<div id="main-workspace">
+    <aside id="layers-panel">
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">الطبقات (اسحب للترتيب)</p>
+        <div id="layers-list"></div>
+    </aside>
+
+    <main id="canvas-area" onclick="toggleSidebar(event)">
+        <div id="canvas-wrapper" onclick="event.stopPropagation()">
+            <canvas id="smartCanvas"></canvas>
+        </div>
+        
+        <!-- أدوات التكبير -->
+        <div id="zoom-controls" class="compact" onclick="toggleZoomControls(event)">
+            <button class="zoom-btn" onclick="zoomOut(); event.stopPropagation();">−</button>
+            <span class="zoom-level" id="zoom-display">100%</span>
+            <button class="zoom-btn" onclick="zoomIn(); event.stopPropagation();">+</button>
+            <button class="zoom-btn" onclick="resetZoom(); event.stopPropagation();" title="إعادة تعيين">⊙</button>
+        </div>
+
+        <!-- مؤشر اختصارات لوحة المفاتيح -->
+        <div id="keyboard-hint" style="display: none;">
+            <div style="font-weight: bold; margin-bottom: 10px; color: var(--primary-color);">اختصارات لوحة المفاتيح</div>
+            <div><span class="kbd">Ctrl+Z</span> تراجع</div>
+            <div><span class="kbd">Ctrl+Y</span> إعادة</div>
+            <div><span class="kbd">Ctrl+D</span> تكرار</div>
+            <div><span class="kbd">Ctrl+G</span> تجميع</div>
+            <div><span class="kbd">Ctrl+Shift+G</span> فك تجميع</div>
+            <div><span class="kbd">Del</span> حذف</div>
+            <div><span class="kbd">Ctrl+A</span> تحديد الكل</div>
+            <div><span class="kbd">Ctrl+C</span> نسخ</div>
+            <div><span class="kbd">Ctrl+V</span> لصق</div>
+            <div><span class="kbd">Ctrl+S</span> حفظ</div>
+            <div><span class="kbd">←↑→↓</span> تحريك</div>
+            <div><span class="kbd">+/−</span> تكبير/تصغير</div>
+        </div>
+    </main>
+
+    <!-- لوحة الخصائص -->
+    <aside id="properties-panel">
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">خصائص العنصر</p>
+        
+        <div id="properties-content">
+            <div style="text-align: center; color: #94a3b8; padding: 20px;">
+                اختر عنصراً لعرض خصائصه
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Animation Panel -->
+<div id="animation-panel" class="hidden">
+    <div id="animation-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-weight: bold; font-size: 14px;">⏱️ Timeline الأنيميشن</span>
+            <div id="time-display">0.0s</div>
+            
+            <!-- Stop Motion Controls -->
+            <div class="stop-motion-controls" id="stop-motion-controls">
+                <button class="anim-btn" onclick="toggleStopMotionMode()" id="stop-motion-toggle" title="Stop Motion Mode">
+                    📷
+                </button>
+                <button class="capture-btn" onclick="captureFrame()" id="capture-btn" style="display: none;">
+                    ● التقط إطار
+                </button>
+                <div class="frame-counter" id="frame-counter" style="display: none;">
+                    إطار: 0
+                </div>
+                <div class="fps-selector" id="fps-selector" style="display: none;">
+                    <label>FPS:</label>
+                    <select id="fps-select" onchange="updateFPS()">
+                        <option value="12">12</option>
+                        <option value="15">15</option>
+                        <option value="24" selected>24</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div id="animation-controls">
+            <button class="anim-btn" onclick="goToStart()" title="البداية">⏮</button>
+            <button class="anim-btn" id="play-btn" onclick="togglePlay()" title="تشغيل/إيقاف">▶</button>
+            <button class="anim-btn" onclick="goToEnd()" title="النهاية">⏭</button>
+            <button class="anim-btn" onclick="undoKeyframe()" title="تراجع عن Keyframe">↩️</button>
+            <button class="anim-btn" onclick="redoKeyframe()" title="إعادة Keyframe">↪️</button>
+            <button class="anim-btn" onclick="addKeyframe()" title="إضافة Keyframe" style="background: var(--primary-color); color: white;">+ ◆</button>
+            <button class="anim-btn" onclick="deleteKeyframe()" title="حذف Keyframe">🗑️</button>
+            <button class="anim-btn" onclick="showEasingPopup()" title="نوع الحركة">🎨</button>
+            <span style="margin: 0 10px; color: var(--menu-text); font-size: 12px;">المدة:</span>
+            <input type="number" id="duration-input" value="5" min="1" max="60" style="width: 60px; background: var(--canvas-bg-area); border: 1px solid var(--border-color); color: var(--menu-text); border-radius: 4px; padding: 4px 8px;" onchange="updateDuration()">
+            <span style="color: var(--menu-text); font-size: 12px;">ثانية</span>
+        </div>
+        
+        <button class="anim-btn" onclick="toggleTimeline()">✕</button>
+    </div>
+    
+    <div id="timeline-container">
+        <div id="timeline">
+            <div class="timeline-ruler" id="timeline-ruler"></div>
+            <div id="playhead">
+                <div class="playhead-handle" onmousedown="startDragPlayhead(event)"></div>
+            </div>
+            <div id="tracks-container"></div>
+        </div>
+    </div>
+</div>
+
+<button class="toggle-timeline-btn" onclick="toggleTimeline()">📽️ Timeline</button>
+
+<!-- Easing Selection Popup -->
+<div id="easing-popup" class="easing-popup">
+    <h3 style="margin-top: 0; color: var(--primary-color);">اختر نوع الحركة</h3>
+    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">
+        اختر كيف يتحرك العنصر بين الـ Keyframes
+    </p>
+    
+    <div class="easing-option" onclick="selectEasing('linear')" data-easing="linear">
+        <div class="easing-preview" style="--easing-animation: easeLinear 1s infinite;"></div>
+        <div>
+            <div style="font-weight: bold;">خطي (Linear)</div>
+            <div style="font-size: 11px; color: #94a3b8;">حركة بنفس السرعة</div>
+        </div>
+    </div>
+    
+    <div class="easing-option" onclick="selectEasing('ease-in-out')" data-easing="ease-in-out">
+        <div class="easing-preview" style="--easing-animation: easeInOut 2s infinite;"></div>
+        <div>
+            <div style="font-weight: bold;">سلس (Ease In-Out)</div>
+            <div style="font-size: 11px; color: #94a3b8;">يبدأ ببطء ويسرع ثم يبطئ</div>
+        </div>
+    </div>
+    
+    <div class="easing-option" onclick="selectEasing('ease-in')" data-easing="ease-in">
+        <div class="easing-preview"></div>
+        <div>
+            <div style="font-weight: bold;">بطء في البداية (Ease In)</div>
+            <div style="font-size: 11px; color: #94a3b8;">يبدأ ببطء ثم يسرع</div>
+        </div>
+    </div>
+    
+    <div class="easing-option" onclick="selectEasing('ease-out')" data-easing="ease-out">
+        <div class="easing-preview"></div>
+        <div>
+            <div style="font-weight: bold;">بطء في النهاية (Ease Out)</div>
+            <div style="font-size: 11px; color: #94a3b8;">يبدأ سريع ثم يبطئ</div>
+        </div>
+    </div>
+    
+    <div class="easing-option" onclick="selectEasing('bounce')" data-easing="bounce">
+        <div class="easing-preview" style="--easing-animation: easeBounce 2s infinite;"></div>
+        <div>
+            <div style="font-weight: bold;">ارتداد (Bounce)</div>
+            <div style="font-size: 11px; color: #94a3b8;">حركة نطاطة ممتعة</div>
+        </div>
+    </div>
+    
+    <div class="easing-option" onclick="selectEasing('elastic')" data-easing="elastic">
+        <div class="easing-preview"></div>
+        <div>
+            <div style="font-weight: bold;">مطاطي (Elastic)</div>
+            <div style="font-size: 11px; color: #94a3b8;">حركة زنبركية</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <button onclick="closeEasingPopup()" style="flex: 1; background: var(--hover-bg); border: 1px solid var(--border-color); color: var(--menu-text); padding: 10px; border-radius: 6px; cursor: pointer;">
+            إلغاء
+        </button>
+        <button onclick="applyEasing()" style="flex: 1; background: var(--primary-color); border: none; color: white; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            تطبيق
+        </button>
+    </div>
+</div>
+
+<div id="emoji-picker-container"></div>
+
+<script>
+    const canvas = new fabric.Canvas('smartCanvas', { 
+        width: 500, 
+        height: 500, 
+        backgroundColor: '#ffffff',
+        preserveObjectStacking: true
+    });
+    let history = [JSON.stringify(canvas)];
+    let redoStack = [];
+    let isChanged = false;
+    let clipboard = null;
+    let currentZoom = 1;
+    let gridEnabled = false;
+
+    // --- متغيرات الأنيميشن ---
+    let animationData = {}; // {objectId: {keyframes: [{time, props, easing}]}}
+    let currentTime = 0;
+    let duration = 5; // بالثواني
+    let isPlaying = false;
+    let animationFrameId = null;
+    let lastTimestamp = 0;
+    let selectedKeyframe = null;
+    let isDraggingPlayhead = false;
+    
+    // Stop Motion
+    let stopMotionMode = false;
+    let stopMotionFrames = 0;
+    let fps = 24;
+    
+    // Easing
+    let selectedEasing = 'linear';
+    let tempEasing = 'linear';
+    
+    // Undo/Redo للـ Keyframes
+    let keyframeHistory = [];
+    let keyframeRedoStack = [];
+
+    // --- وظائف إدارة السمات ---
+    function changeTheme(themeName) {
+        document.body.setAttribute('data-theme', themeName);
+        localStorage.setItem('selectedTheme', themeName);
+        updateActiveTheme(themeName);
+    }
+
+    function updateActiveTheme(themeName) {
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            if (option.textContent.includes(themeName === 'dark' ? 'داكن' : 
+                themeName === 'light' ? 'فاتح' : 
+                themeName === 'ocean' ? 'محيط' : 
+                themeName === 'sunset' ? 'غروب' : 
+                themeName === 'forest' ? 'غابة' : 
+                themeName === 'purple' ? 'بنفسجي' : 
+                themeName === 'rose' ? 'وردي' : '')) {
+                option.classList.add('active');
+            }
+        });
+    }
+
+    function applyCustomColors() {
+        const menuBg = document.getElementById('custom-menu-bg').value;
+        const menuText = document.getElementById('custom-menu-text').value;
+        const canvasBg = document.getElementById('custom-canvas-bg').value;
+        const hoverBg = document.getElementById('custom-hover-bg').value;
+        const primary = document.getElementById('custom-primary').value;
+
+        document.documentElement.style.setProperty('--menu-bg', menuBg);
+        document.documentElement.style.setProperty('--menu-text', menuText);
+        document.documentElement.style.setProperty('--canvas-bg-area', canvasBg);
+        document.documentElement.style.setProperty('--hover-bg', hoverBg);
+        document.documentElement.style.setProperty('--primary-color', primary);
+        document.documentElement.style.setProperty('--border-color', hoverBg);
+        document.documentElement.style.setProperty('--sidebar-bg', `${menuBg}cc`);
+
+        localStorage.setItem('customTheme', JSON.stringify({
+            menuBg, menuText, canvasBg, hoverBg, primary
+        }));
+        
+        document.body.removeAttribute('data-theme');
+        updateActiveTheme('custom');
+    }
+
+    function resetTheme() {
+        changeTheme('dark');
+        document.getElementById('custom-menu-bg').value = '#0f172a';
+        document.getElementById('custom-menu-text').value = '#e2e8f0';
+        document.getElementById('custom-canvas-bg').value = '#1e293b';
+        document.getElementById('custom-hover-bg').value = '#334155';
+        document.getElementById('custom-primary').value = '#2563eb';
+        localStorage.removeItem('customTheme');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('selectedTheme');
+        const customTheme = localStorage.getItem('customTheme');
+        
+        if (customTheme) {
+            const colors = JSON.parse(customTheme);
+            document.getElementById('custom-menu-bg').value = colors.menuBg;
+            document.getElementById('custom-menu-text').value = colors.menuText;
+            document.getElementById('custom-canvas-bg').value = colors.canvasBg;
+            document.getElementById('custom-hover-bg').value = colors.hoverBg;
+            document.getElementById('custom-primary').value = colors.primary;
+            applyCustomColors();
+        } else if (savedTheme) {
+            changeTheme(savedTheme);
+        } else {
+            updateActiveTheme('dark');
+        }
+    });
+
+    // --- وظائف الموبايل ---
+    function toggleSidebar(e) {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.toggle('active-sidebar');
+            e.stopPropagation();
+        }
+    }
+
+    function closeSidebar(e) {
+        if (window.innerWidth <= 768) {
+            const menu = document.getElementById('top-menu');
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('active-sidebar');
+            }
+        }
+    }
+
+    canvas.on('mouse:down', () => {
+        if (window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    });
+
+    window.onbeforeunload = function() {
+        if (isChanged) return "لديك عمل لم يتم حفظه، هل أنت متأكد من المغادرة؟";
+    };
+
+    function saveState() {
+        history.push(JSON.stringify(canvas));
+        if (history.length > 20) history.shift();
+        redoStack = [];
+        isChanged = true;
+    }
+
+    // --- وظائف التعديل والكانفاس ---
+    function saveProject() {
+        const json = JSON.stringify(canvas.toJSON());
+        const blob = new Blob([json], { type: "application/json" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "design.imoko";
+        link.click();
+        isChanged = false;
+    }
+
+    function importProject(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            canvas.loadFromJSON(e.target.result, () => {
+                canvas.renderAll();
+                renderLayers();
+                saveState();
+                isChanged = false;
+            });
+        };
+        reader.readAsText(file);
+    }
+
+    function newProject() {
+        if (isChanged && !confirm("هل تريد البدء من جديد؟ ستفقد التغييرات غير المحفوظة.")) return;
+        location.reload();
+    }
+
+    function applySettings() {
+        const w = parseInt(document.getElementById('canvas-width').value);
+        const h = parseInt(document.getElementById('canvas-height').value);
+        const bg = document.getElementById('canvas-bg').value;
+        canvas.setWidth(w); canvas.setHeight(h);
+        canvas.setBackgroundColor(bg, canvas.renderAll.bind(canvas));
+        saveState();
+    }
+
+    // --- رفع الصور الجديدة ---
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fabric.Image.fromURL(e.target.result, (img) => {
+                // تصغير الصورة إذا كانت كبيرة جداً
+                const maxSize = 300;
+                if (img.width > maxSize || img.height > maxSize) {
+                    const scale = Math.min(maxSize / img.width, maxSize / img.height);
+                    img.scale(scale);
+                }
+                
+                img.set({
+                    left: canvas.width / 2 - (img.width * img.scaleX) / 2,
+                    top: canvas.height / 2 - (img.height * img.scaleY) / 2
+                });
+                
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+                saveState();
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- إضافة نص ---
+    function addText() {
+        const text = new fabric.IText('انقر هنا للتعديل', {
+            left: canvas.width / 2 - 80,
+            top: canvas.height / 2 - 20,
+            fontSize: 30,
+            fill: '#000000',
+            fontFamily: 'Arial'
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        text.enterEditing();
+        saveState();
+    }
+
+    const picker = new EmojiMart.Picker({
+        onEmojiSelect: (emoji) => { addEmoji(emoji.native); toggleEmojiPicker(); },
+        locale: 'ar', theme: 'dark'
+    });
+    document.getElementById('emoji-picker-container').appendChild(picker);
+
+    function toggleEmojiPicker() {
+        const p = document.getElementById('emoji-picker-container');
+        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        if (p.style.display === 'block' && window.innerWidth <= 768) {
+            document.getElementById('top-menu').classList.remove('active-sidebar');
+        }
+    }
+
+    function addEmoji(emoji) {
+        const text = new fabric.Text(emoji, { left: canvas.width/2 - 40, top: canvas.height/2 - 40, fontSize: 80 });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        saveState();
+    }
+
+    function undo() {
+        if (history.length <= 1) return;
+        redoStack.push(history.pop());
+        canvas.loadFromJSON(history[history.length - 1], () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop(); history.push(state);
+        canvas.loadFromJSON(state, () => { canvas.renderAll(); renderLayers(); });
+    }
+
+    function flipObject() {
+        const active = canvas.getActiveObject();
+        if (active) { active.set('flipX', !active.flipX); canvas.renderAll(); saveState(); }
+    }
+
+    function flipVertical() {
+        const active = canvas.getActiveObject();
+        if (active) { active.set('flipY', !active.flipY); canvas.renderAll(); saveState(); }
+    }
+
+    function duplicateObject() {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        active.clone((cloned) => {
+            cloned.set({ left: cloned.left + 20, top: cloned.top + 20 });
+            canvas.add(cloned);
+            canvas.setActiveObject(cloned);
+            saveState();
+        });
+    }
+
+    function deleteObj() {
+        const active = canvas.getActiveObject();
+        if(active && !active.locked) { 
+            canvas.remove(active); 
+            saveState(); 
+        }
+    }
+
+    function saveImg() {
+        canvas.discardActiveObject();
+        canvas.renderAll();
+        const link = document.createElement('a');
+        link.download = 'design.png';
+        link.href = canvas.toDataURL({ multiplier: 2 });
+        link.click();
+        isChanged = false;
+    }
+
+    function exportSVG() {
+        const svg = canvas.toSVG();
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'design.svg';
+        link.click();
+    }
+
+    // --- وظائف النسخ واللصق ---
+    function copyObject() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            active.clone((cloned) => {
+                clipboard = cloned;
+            });
+        }
+    }
+
+    function pasteObject() {
+        if (!clipboard) return;
+        clipboard.clone((cloned) => {
+            cloned.set({
+                left: cloned.left + 20,
+                top: cloned.top + 20
+            });
+            canvas.add(cloned);
+            canvas.setActiveObject(cloned);
+            clipboard = cloned;
+            saveState();
+        });
+    }
+
+    function selectAll() {
+        const allObjects = canvas.getObjects();
+        const selection = new fabric.ActiveSelection(allObjects, { canvas: canvas });
+        canvas.setActiveObject(selection);
+        canvas.renderAll();
+    }
+
+    // --- وظائف الترتيب ---
+    function bringToFront() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            canvas.bringToFront(active);
+            canvas.renderAll();
+            saveState();
+            renderLayers();
+        }
+    }
+
+    function sendToBack() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            canvas.sendToBack(active);
+            canvas.renderAll();
+            saveState();
+            renderLayers();
+        }
+    }
+
+    // --- وظائف المحاذاة ---
+    function alignLeft() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            active.set({ left: 0 });
+            canvas.renderAll();
+            saveState();
+        }
+    }
+
+    function alignCenter() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            active.set({ left: canvas.width / 2 - (active.width * active.scaleX) / 2 });
+            canvas.renderAll();
+            saveState();
+        }
+    }
+
+    function alignRight() {
+        const active = canvas.getActiveObject();
+        if (active) {
+            active.set({ left: canvas.width - (active.width * active.scaleX) });
+            canvas.renderAll();
+            saveState();
+        }
+    }
+
+    // --- وظائف التكبير ---
+    function zoomIn() {
+        currentZoom = Math.min(currentZoom + 0.1, 3);
+        canvas.setZoom(currentZoom);
+        updateZoomDisplay();
+    }
+
+    function zoomOut() {
+        currentZoom = Math.max(currentZoom - 0.1, 0.5);
+        canvas.setZoom(currentZoom);
+        updateZoomDisplay();
+    }
+
+    function resetZoom() {
+        currentZoom = 1;
+        canvas.setZoom(currentZoom);
+        canvas.viewportTransform[4] = 0;
+        canvas.viewportTransform[5] = 0;
+        canvas.renderAll();
+        updateZoomDisplay();
+    }
+
+    function updateZoomDisplay() {
+        document.getElementById('zoom-display').textContent = Math.round(currentZoom * 100) + '%';
+    }
+
+    function toggleZoomControls(event) {
+        const controls = document.getElementById('zoom-controls');
+        controls.classList.toggle('compact');
+        event.stopPropagation();
+    }
+
+    // إخفاء الزوم عند الضغط خارجه
+    document.addEventListener('click', (e) => {
+        const controls = document.getElementById('zoom-controls');
+        if (!controls.contains(e.target) && !controls.classList.contains('compact')) {
+            controls.classList.add('compact');
+        }
+    });
+
+    // --- الشبكة ---
+    function toggleGrid() {
+        gridEnabled = !gridEnabled;
+        if (gridEnabled) {
+            drawGrid();
+        } else {
+            canvas.overlayImage = null;
+            canvas.renderAll();
+        }
+    }
+
+    function drawGrid() {
+        const gridSize = 50;
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        const gridCanvas = document.createElement('canvas');
+        gridCanvas.width = width;
+        gridCanvas.height = height;
+        const ctx = gridCanvas.getContext('2d');
+        
+        ctx.strokeStyle = 'rgba(150, 150, 150, 0.2)';
+        ctx.lineWidth = 1;
+        
+        for (let i = 0; i <= width; i += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, height);
+            ctx.stroke();
+        }
+        
+        for (let i = 0; i <= height; i += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(width, i);
+            ctx.stroke();
+        }
+        
+        fabric.Image.fromURL(gridCanvas.toDataURL(), (img) => {
+            canvas.overlayImage = img;
+            canvas.renderAll();
+        });
+    }
+
+    // --- وظائف الطبقات المحسنة ---
+    function renderLayers() {
+        const list = document.getElementById('layers-list');
+        list.innerHTML = '';
+        const objects = canvas.getObjects();
+        const activeObj = canvas.getActiveObject();
+
+        objects.slice().reverse().forEach((obj) => {
+            const index = objects.indexOf(obj);
+            const div = document.createElement('div');
+            div.className = 'layer-item' + (obj === activeObj ? ' active-layer' : '') + (obj.locked ? ' locked' : '');
+            div.dataset.id = index;
+            
+            const lockIcon = obj.locked ? '🔒' : '🔓';
+            const objType = obj.type === 'i-text' ? '📝' : obj.type === 'image' ? '🖼️' : obj.text || '🧩';
+            
+            div.innerHTML = `
+                <button class="layer-lock-btn" onclick="toggleLock(${index}); event.stopPropagation();" title="${obj.locked ? 'إلغاء القفل' : 'قفل الطبقة'}">${lockIcon}</button>
+                <div style="background: var(--primary-color); padding: 2px 8px; border-radius: 4px; margin-left: 10px; color: white; font-size:10px;">${index + 1}</div>
+                <div class="layer-preview">${objType}</div>
+            `;
+            div.onclick = () => { 
+                if (!obj.locked) {
+                    canvas.setActiveObject(obj); 
+                    canvas.renderAll(); 
+                    renderLayers();
+                    updateProperties();
+                }
+            };
+            list.appendChild(div);
+        });
+    }
+
+    function toggleLock(index) {
+        const obj = canvas.getObjects()[index];
+        obj.locked = !obj.locked;
+        obj.selectable = !obj.locked;
+        obj.evented = !obj.locked;
+        canvas.renderAll();
+        renderLayers();
+    }
+
+    new Sortable(document.getElementById('layers-list'), {
+        animation: 150,
+        onEnd: () => {
+            const items = document.querySelectorAll('.layer-item');
+            const newOrder = Array.from(items).map(i => parseInt(i.dataset.id)).reverse();
+            const objs = canvas.getObjects();
+            
+            newOrder.forEach((oldIdx, newIdx) => {
+                objs[oldIdx].moveTo(newIdx);
+            });
+            
+            canvas.renderAll();
+            saveState();
+            renderLayers();
+        }
+    });
+
+    // --- لوحة الخصائص ---
+    function updateProperties() {
+        const active = canvas.getActiveObject();
+        const panel = document.getElementById('properties-content');
+        
+        if (!active) {
+            panel.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">اختر عنصراً لعرض خصائصه</div>';
+            return;
+        }
+        
+        panel.innerHTML = `
+            <div class="property-group">
+                <div class="property-title">الموضع والحجم</div>
+                <div class="property-control">
+                    <label>س (X)</label>
+                    <input type="number" value="${Math.round(active.left)}" onchange="updateObjectProperty('left', this.value)">
+                </div>
+                <div class="property-control">
+                    <label>ص (Y)</label>
+                    <input type="number" value="${Math.round(active.top)}" onchange="updateObjectProperty('top', this.value)">
+                </div>
+                <div class="property-control">
+                    <label>المقياس</label>
+                    <input type="range" min="0.1" max="3" step="0.1" value="${active.scaleX || 1}" oninput="updateObjectScale(this.value)">
+                    <span>${Math.round((active.scaleX || 1) * 100)}%</span>
+                </div>
+            </div>
+            
+            <div class="property-group">
+                <div class="property-title">الدوران</div>
+                <div class="property-control">
+                    <label>الزاوية</label>
+                    <input type="range" min="0" max="360" value="${active.angle || 0}" oninput="updateObjectProperty('angle', this.value)">
+                    <span>${Math.round(active.angle || 0)}°</span>
+                </div>
+                <div class="property-control">
+                    <button onclick="rotateObject(-90)">↶ 90°</button>
+                    <button onclick="rotateObject(90)">↷ 90°</button>
+                    <button onclick="updateObjectProperty('angle', 0)">⊙ 0°</button>
+                </div>
+            </div>
+            
+            <div class="property-group">
+                <div class="property-title">الشفافية</div>
+                <div class="property-control">
+                    <label>العتامة</label>
+                    <input type="range" min="0" max="1" step="0.1" value="${active.opacity || 1}" oninput="updateObjectProperty('opacity', this.value)">
+                    <span>${Math.round((active.opacity || 1) * 100)}%</span>
+                </div>
+            </div>
+            
+            ${active.type === 'text' || active.type === 'i-text' ? `
+            <div class="property-group">
+                <div class="property-title">النص</div>
+                <div class="property-control" style="flex-direction: column; align-items: stretch;">
+                    <label style="margin-bottom: 5px;">المحتوى</label>
+                    <textarea id="text-content-input" style="width: 100%; min-height: 60px; background: var(--canvas-bg-area); border: 1px solid var(--border-color); color: var(--menu-text); border-radius: 4px; padding: 8px; font-family: inherit; resize: vertical;" oninput="updateTextContent(this.value)">${active.text || ''}</textarea>
+                </div>
+                <div class="property-control">
+                    <label>الحجم</label>
+                    <input type="number" value="${active.fontSize || 20}" onchange="updateObjectProperty('fontSize', this.value)">
+                </div>
+                <div class="property-control">
+                    <label>اللون</label>
+                    <input type="color" value="${active.fill || '#000000'}" onchange="updateObjectProperty('fill', this.value)">
+                </div>
+                <div class="property-control">
+                    <button onclick="toggleTextStyle('fontWeight', 'bold', 'normal')" style="${active.fontWeight === 'bold' ? 'background: var(--primary-color); color: white;' : ''}">B</button>
+                    <button onclick="toggleTextStyle('fontStyle', 'italic', 'normal')" style="${active.fontStyle === 'italic' ? 'background: var(--primary-color); color: white;' : ''}">I</button>
+                    <button onclick="toggleTextStyle('underline', true, false)" style="${active.underline ? 'background: var(--primary-color); color: white;' : ''}">U</button>
+                </div>
+            </div>
+            ` : ''}
+            
+            ${active.type === 'group' ? `
+            <div class="property-group">
+                <div class="property-title">مجموعة</div>
+                <div style="padding: 8px 0; color: #94a3b8; font-size: 13px;">
+                    هذا العنصر عبارة عن مجموعة تحتوي على ${active._objects ? active._objects.length : 0} عنصر
+                </div>
+                <div class="property-control">
+                    <button onclick="ungroupObjects()" style="width: 100%;">📂 فك التجميع</button>
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="property-group">
+                <div class="property-title">إجراءات</div>
+                <div class="property-control">
+                    <button onclick="duplicateObject()" style="width: 100%;">📄 تكرار</button>
+                </div>
+                <div class="property-control">
+                    <button onclick="deleteObj()" style="width: 100%; background: #ef4444; color: white;">❌ حذف</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function updateTextContent(newText) {
+        const active = canvas.getActiveObject();
+        if (!active || (active.type !== 'text' && active.type !== 'i-text')) return;
+        
+        active.set('text', newText);
+        canvas.renderAll();
+        saveState();
+    }
+
+    function toggleTextStyle(prop, activeValue, inactiveValue) {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        
+        const currentValue = active[prop];
+        const newValue = currentValue === activeValue ? inactiveValue : activeValue;
+        active.set(prop, newValue);
+        
+        canvas.renderAll();
+        saveState();
+        updateProperties();
+    }
+
+    function updateObjectProperty(prop, value) {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        
+        if (prop === 'fill') {
+            active.set(prop, value);
+        } else {
+            active.set(prop, parseFloat(value) || value);
+        }
+        
+        canvas.renderAll();
+        saveState();
+        updateProperties();
+    }
+
+    function updateObjectScale(value) {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        
+        active.set({
+            scaleX: parseFloat(value),
+            scaleY: parseFloat(value)
+        });
+        
+        canvas.renderAll();
+        saveState();
+        updateProperties();
+    }
+
+    function rotateObject(degrees) {
+        const active = canvas.getActiveObject();
+        if (!active) return;
+        
+        active.set('angle', (active.angle || 0) + degrees);
+        canvas.renderAll();
+        saveState();
+        updateProperties();
+    }
+
+    // --- وظائف التجميع ---
+    function groupObjects() {
+        const activeSelection = canvas.getActiveObject();
+        
+        // تأكد من أن هناك تحديد متعدد
+        if (!activeSelection || activeSelection.type !== 'activeSelection') {
+            alert('اختر عنصرين أو أكثر للتجميع');
+            return;
+        }
+        
+        // تحويل التحديد المتعدد إلى مجموعة
+        const group = activeSelection.toGroup();
+        canvas.requestRenderAll();
+        saveState();
+        renderLayers();
+        updateProperties();
+    }
+
+    function ungroupObjects() {
+        const activeObject = canvas.getActiveObject();
+        
+        // تأكد من أن العنصر المحدد هو مجموعة
+        if (!activeObject || activeObject.type !== 'group') {
+            alert('اختر مجموعة لفكها');
+            return;
+        }
+        
+        // فك المجموعة إلى عناصر منفصلة
+        activeObject.toActiveSelection();
+        canvas.requestRenderAll();
+        saveState();
+        renderLayers();
+        updateProperties();
+    }
+
+    // --- اختصارات لوحة المفاتيح ---
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + Z = Undo
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+        }
+        // Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z = Redo
+        else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            redo();
+        }
+        // Ctrl/Cmd + D = Duplicate
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+            e.preventDefault();
+            duplicateObject();
+        }
+        // Ctrl/Cmd + G = Group
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
+            e.preventDefault();
+            groupObjects();
+        }
+        // Ctrl/Cmd + Shift + G = Ungroup
+        else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'g') {
+            e.preventDefault();
+            ungroupObjects();
+        }
+        // Delete or Backspace = Delete
+        else if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (!document.activeElement || document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                deleteObj();
+            }
+        }
+        // Ctrl/Cmd + A = Select All
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            selectAll();
+        }
+        // Ctrl/Cmd + C = Copy
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+            e.preventDefault();
+            copyObject();
+        }
+        // Ctrl/Cmd + V = Paste
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+            e.preventDefault();
+            pasteObject();
+        }
+        // Ctrl/Cmd + S = Save
+        else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveProject();
+        }
+        // Arrow keys = Move
+        else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            const active = canvas.getActiveObject();
+            if (active) {
+                e.preventDefault();
+                const step = e.shiftKey ? 10 : 1;
+                switch(e.key) {
+                    case 'ArrowUp': active.top -= step; break;
+                    case 'ArrowDown': active.top += step; break;
+                    case 'ArrowLeft': active.left -= step; break;
+                    case 'ArrowRight': active.left += step; break;
+                }
+                canvas.renderAll();
+                saveState();
+                updateProperties();
+            }
+        }
+        // + = Zoom in
+        else if (e.key === '+' || e.key === '=') {
+            e.preventDefault();
+            zoomIn();
+        }
+        // - = Zoom out
+        else if (e.key === '-') {
+            e.preventDefault();
+            zoomOut();
+        }
+    });
+
+    // --- وظائف المساعدة ---
+    function toggleKeyboardHints() {
+        const hints = document.getElementById('keyboard-hint');
+        hints.style.display = hints.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function showAbout() {
+        alert('محرر الإيموجي المتقدم - IMOKO Pro\n\nنسخة5.4 \n\nمحرر رسومات قوي مع دعم الإيموجي والصور والنصوص\n\nتطوير: adrezer');
+    }
+
+    // --- ربط الأحداث ---
+    canvas.on({
+        'selection:created': () => {
+            renderLayers();
+            updateProperties();
+        },
+        'selection:updated': () => {
+            renderLayers();
+            updateProperties();
+        },
+        'selection:cleared': () => {
+            renderLayers();
+            updateProperties();
+        },
+        'object:added': () => {
+            renderLayers();
+            updateProperties();
+        },
+        'object:removed': () => {
+            renderLayers();
+            updateProperties();
+        },
+        'object:modified': () => {
+            saveState();
+            updateProperties();
+        },
+        'object:moving': updateProperties,
+        'object:scaling': updateProperties,
+        'object:rotating': updateProperties
+    });
+
+    // تهيئة أولية
+    renderLayers();
+    updateZoomDisplay();
+    initTimeline();
+
+    // --- وظائف Timeline والأنيميشن ---
+    function initTimeline() {
+        updateTimelineRuler();
+        renderTracks();
+    }
+
+    function toggleTimeline() {
+        const panel = document.getElementById('animation-panel');
+        panel.classList.toggle('hidden');
+    }
+
+    function updateTimelineRuler() {
+        const ruler = document.getElementById('timeline-ruler');
+        ruler.innerHTML = '';
+        
+        for (let i = 0; i <= duration; i++) {
+            const sec = document.createElement('div');
+            sec.className = 'timeline-second';
+            sec.textContent = i + 's';
+            sec.style.left = (i * 100) + 'px';
+            ruler.appendChild(sec);
+        }
+        
+        // تحديث عرض الـ timeline
+        document.getElementById('timeline').style.minWidth = (duration * 100) + 'px';
+    }
+
+    function updateDuration() {
+        duration = parseInt(document.getElementById('duration-input').value) || 5;
+        updateTimelineRuler();
+        renderTracks();
+    }
+
+    function renderTracks() {
+        const container = document.getElementById('tracks-container');
+        container.innerHTML = '';
+        
+        const objects = canvas.getObjects();
+        objects.forEach((obj, index) => {
+            const track = document.createElement('div');
+            track.className = 'object-track';
+            track.dataset.objectId = getObjectId(obj);
+            
+            const label = document.createElement('div');
+            label.className = 'track-label';
+            label.textContent = obj.text || obj.type || `Object ${index + 1}`;
+            track.appendChild(label);
+            
+            // إضافة الـ keyframes
+            const objId = getObjectId(obj);
+            if (animationData[objId]) {
+                animationData[objId].keyframes.forEach((kf, kfIndex) => {
+                    const keyframe = document.createElement('div');
+                    keyframe.className = 'keyframe';
+                    keyframe.style.left = (kf.time * 100) + 'px';
+                    keyframe.dataset.objectId = objId;
+                    keyframe.dataset.keyframeIndex = kfIndex;
+                    keyframe.onclick = (e) => {
+                        e.stopPropagation();
+                        selectKeyframe(objId, kfIndex);
+                    };
+                    track.appendChild(keyframe);
+                });
+            }
+            
+            container.appendChild(track);
+        });
+    }
+
+    function getObjectId(obj) {
+        if (!obj.__customId) {
+            obj.__customId = 'obj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        return obj.__customId;
+    }
+
+    function addKeyframe() {
+        const active = canvas.getActiveObject();
+        if (!active) {
+            alert('اختر عنصراً أولاً لإضافة Keyframe');
+            return;
+        }
+        
+        saveKeyframeState(); // حفظ الحالة قبل الإضافة
+        
+        const objId = getObjectId(active);
+        
+        if (!animationData[objId]) {
+            animationData[objId] = { keyframes: [] };
+        }
+        
+        // التحقق من عدم وجود keyframe في نفس الوقت
+        const existingKf = animationData[objId].keyframes.find(kf => Math.abs(kf.time - currentTime) < 0.01);
+        if (existingKf) {
+            // تحديث الـ keyframe الموجود
+            existingKf.props = {
+                left: active.left,
+                top: active.top,
+                scaleX: active.scaleX,
+                scaleY: active.scaleY,
+                angle: active.angle,
+                opacity: active.opacity
+            };
+            existingKf.easing = selectedEasing;
+        } else {
+            // إضافة keyframe جديد
+            animationData[objId].keyframes.push({
+                time: currentTime,
+                props: {
+                    left: active.left,
+                    top: active.top,
+                    scaleX: active.scaleX,
+                    scaleY: active.scaleY,
+                    angle: active.angle,
+                    opacity: active.opacity
+                },
+                easing: selectedEasing
+            });
+            
+            // ترتيب الـ keyframes حسب الوقت
+            animationData[objId].keyframes.sort((a, b) => a.time - b.time);
+        }
+        
+        renderTracks();
+        alert('✓ تم إضافة Keyframe عند ' + currentTime.toFixed(1) + 's');
+    }
+
+    function deleteKeyframe() {
+        if (!selectedKeyframe) {
+            alert('اختر Keyframe أولاً لحذفه');
+            return;
+        }
+        
+        saveKeyframeState(); // حفظ الحالة قبل الحذف
+        
+        const { objId, kfIndex } = selectedKeyframe;
+        if (animationData[objId] && animationData[objId].keyframes[kfIndex]) {
+            animationData[objId].keyframes.splice(kfIndex, 1);
+            selectedKeyframe = null;
+            renderTracks();
+        }
+    }
+
+    function selectKeyframe(objId, kfIndex) {
+        // إزالة التحديد السابق
+        document.querySelectorAll('.keyframe.selected').forEach(kf => kf.classList.remove('selected'));
+        
+        // تحديد الـ keyframe الجديد
+        const kfElement = document.querySelector(`.keyframe[data-object-id="${objId}"][data-keyframe-index="${kfIndex}"]`);
+        if (kfElement) {
+            kfElement.classList.add('selected');
+            selectedKeyframe = { objId, kfIndex };
+            
+            // الانتقال إلى وقت الـ keyframe
+            const kf = animationData[objId].keyframes[kfIndex];
+            if (kf) {
+                setCurrentTime(kf.time);
+            }
+        }
+    }
+
+    function setCurrentTime(time) {
+        currentTime = Math.max(0, Math.min(duration, time));
+        updatePlayhead();
+        updateTimeDisplay();
+        applyAnimationAtTime(currentTime);
+    }
+
+    function updatePlayhead() {
+        const playhead = document.getElementById('playhead');
+        playhead.style.left = (currentTime * 100) + 'px';
+    }
+
+    function updateTimeDisplay() {
+        document.getElementById('time-display').textContent = currentTime.toFixed(1) + 's';
+    }
+
+    function applyAnimationAtTime(time) {
+        const objects = canvas.getObjects();
+        
+        objects.forEach(obj => {
+            const objId = getObjectId(obj);
+            if (!animationData[objId] || animationData[objId].keyframes.length === 0) return;
+            
+            const keyframes = animationData[objId].keyframes;
+            
+            // إيجاد الـ keyframes المحيطة
+            let prevKf = null;
+            let nextKf = null;
+            
+            for (let i = 0; i < keyframes.length; i++) {
+                if (keyframes[i].time <= time) {
+                    prevKf = keyframes[i];
+                }
+                if (keyframes[i].time > time && !nextKf) {
+                    nextKf = keyframes[i];
+                    break;
+                }
+            }
+            
+            if (prevKf && !nextKf) {
+                // نحن بعد آخر keyframe
+                obj.set(prevKf.props);
+            } else if (prevKf && nextKf) {
+                // Interpolation بين keyframes مع تطبيق الـ easing
+                const rawT = (time - prevKf.time) / (nextKf.time - prevKf.time);
+                const easing = nextKf.easing || 'linear';
+                const t = applyEasingFunction(rawT, easing);
+                
+                obj.set({
+                    left: lerp(prevKf.props.left, nextKf.props.left, t),
+                    top: lerp(prevKf.props.top, nextKf.props.top, t),
+                    scaleX: lerp(prevKf.props.scaleX, nextKf.props.scaleX, t),
+                    scaleY: lerp(prevKf.props.scaleY, nextKf.props.scaleY, t),
+                    angle: lerp(prevKf.props.angle, nextKf.props.angle, t),
+                    opacity: lerp(prevKf.props.opacity, nextKf.props.opacity, t)
+                });
+            } else if (nextKf && !prevKf) {
+                // نحن قبل أول keyframe
+                obj.set(nextKf.props);
+            }
+        });
+        
+        canvas.renderAll();
+    }
+
+    function lerp(start, end, t) {
+        return start + (end - start) * t;
+    }
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        const btn = document.getElementById('play-btn');
+        
+        if (isPlaying) {
+            btn.textContent = '⏸';
+            btn.classList.add('active');
+            lastTimestamp = performance.now();
+            animationFrameId = requestAnimationFrame(animate);
+        } else {
+            btn.textContent = '▶';
+            btn.classList.remove('active');
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+    }
+
+    function animate(timestamp) {
+        if (!isPlaying) return;
+        
+        const deltaTime = (timestamp - lastTimestamp) / 1000; // تحويل لثواني
+        lastTimestamp = timestamp;
+        
+        currentTime += deltaTime;
+        
+        if (currentTime >= duration) {
+            currentTime = 0; // إعادة التشغيل من البداية
+        }
+        
+        updatePlayhead();
+        updateTimeDisplay();
+        applyAnimationAtTime(currentTime);
+        
+        animationFrameId = requestAnimationFrame(animate);
+    }
+
+    function goToStart() {
+        setCurrentTime(0);
+    }
+
+    function goToEnd() {
+        setCurrentTime(duration);
+    }
+
+    // Drag playhead
+    function startDragPlayhead(e) {
+        isDraggingPlayhead = true;
+        e.preventDefault();
+        
+        const wasPlaying = isPlaying;
+        if (isPlaying) togglePlay(); // إيقاف التشغيل أثناء السحب
+        
+        const onMouseMove = (e) => {
+            if (!isDraggingPlayhead) return;
+            
+            const timeline = document.getElementById('timeline');
+            const rect = timeline.getBoundingClientRect();
+            const x = e.clientX - rect.left + timeline.parentElement.scrollLeft;
+            const time = x / 100;
+            
+            setCurrentTime(time);
+        };
+        
+        const onMouseUp = () => {
+            isDraggingPlayhead = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            
+            if (wasPlaying) togglePlay(); // إعادة التشغيل إذا كان يعمل
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
+    // تحديث التتبع عند إضافة/حذف عناصر
+    canvas.on('object:added', () => {
+        renderTracks();
+    });
+    
+    canvas.on('object:removed', (e) => {
+        const objId = getObjectId(e.target);
+        delete animationData[objId];
+        renderTracks();
+    });
+
+    // --- Stop Motion Mode ---
+    function toggleStopMotionMode() {
+        stopMotionMode = !stopMotionMode;
+        const controls = document.getElementById('stop-motion-controls');
+        const toggleBtn = document.getElementById('stop-motion-toggle');
+        const captureBtn = document.getElementById('capture-btn');
+        const frameCounter = document.getElementById('frame-counter');
+        const fpsSelector = document.getElementById('fps-selector');
+        
+        if (stopMotionMode) {
+            controls.classList.add('active');
+            toggleBtn.classList.add('active');
+            toggleBtn.style.background = '#ef4444';
+            toggleBtn.style.color = 'white';
+            captureBtn.style.display = 'flex';
+            frameCounter.style.display = 'block';
+            fpsSelector.style.display = 'flex';
+            
+            // إيقاف التشغيل إذا كان يعمل
+            if (isPlaying) togglePlay();
+            
+            // إعادة تعيين العداد
+            stopMotionFrames = 0;
+            updateFrameCounter();
+        } else {
+            controls.classList.remove('active');
+            toggleBtn.classList.remove('active');
+            toggleBtn.style.background = '';
+            toggleBtn.style.color = '';
+            captureBtn.style.display = 'none';
+            frameCounter.style.display = 'none';
+            fpsSelector.style.display = 'none';
+        }
+    }
+
+    function captureFrame() {
+        const active = canvas.getActiveObject();
+        if (!active) {
+            alert('اختر عنصراً أولاً!');
+            return;
+        }
+        
+        saveKeyframeState(); // حفظ الحالة قبل الالتقاط
+        
+        // حساب الوقت بناءً على FPS
+        const frameTime = stopMotionFrames / fps;
+        
+        // تحديث الوقت الحالي
+        setCurrentTime(frameTime);
+        
+        // إضافة keyframe تلقائياً
+        const objId = getObjectId(active);
+        
+        if (!animationData[objId]) {
+            animationData[objId] = { keyframes: [] };
+        }
+        
+        animationData[objId].keyframes.push({
+            time: frameTime,
+            props: {
+                left: active.left,
+                top: active.top,
+                scaleX: active.scaleX,
+                scaleY: active.scaleY,
+                angle: active.angle,
+                opacity: active.opacity
+            },
+            easing: selectedEasing
+        });
+        
+        // ترتيب الـ keyframes
+        animationData[objId].keyframes.sort((a, b) => a.time - b.time);
+        
+        // تحديث العداد
+        stopMotionFrames++;
+        updateFrameCounter();
+        
+        // تحديث المدة إذا لزم الأمر
+        if (frameTime > duration) {
+            duration = Math.ceil(frameTime) + 1;
+            document.getElementById('duration-input').value = duration;
+            updateTimelineRuler();
+        }
+        
+        renderTracks();
+        
+        // تأثير بصري
+        const captureBtn = document.getElementById('capture-btn');
+        captureBtn.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            captureBtn.style.transform = 'scale(1)';
+        }, 200);
+        
+        // صوت التقاط (محاكاة)
+        playClickSound();
+    }
+
+    function updateFrameCounter() {
+        document.getElementById('frame-counter').textContent = `إطار: ${stopMotionFrames}`;
+    }
+
+    function updateFPS() {
+        fps = parseInt(document.getElementById('fps-select').value);
+    }
+
+    function playClickSound() {
+        // محاكاة صوت الكاميرا
+        const audio = new AudioContext();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        
+        oscillator.frequency.value = 800;
+        gain.gain.setValueAtTime(0.3, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.1);
+        
+        oscillator.start(audio.currentTime);
+        oscillator.stop(audio.currentTime + 0.1);
+    }
+
+    // --- Easing Functions ---
+    function showEasingPopup() {
+        if (!selectedKeyframe) {
+            alert('اختر Keyframe أولاً لتغيير نوع حركته!');
+            return;
+        }
+        
+        const popup = document.getElementById('easing-popup');
+        popup.classList.add('visible');
+        
+        // تحديد الـ easing الحالي
+        const { objId, kfIndex } = selectedKeyframe;
+        const currentEasing = animationData[objId]?.keyframes[kfIndex]?.easing || 'linear';
+        tempEasing = currentEasing;
+        
+        // تحديد الخيار المناسب
+        document.querySelectorAll('.easing-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.easing === currentEasing) {
+                opt.classList.add('selected');
+            }
+        });
+    }
+
+    function closeEasingPopup() {
+        document.getElementById('easing-popup').classList.remove('visible');
+    }
+
+    function selectEasing(easing) {
+        tempEasing = easing;
+        
+        // تحديث UI
+        document.querySelectorAll('.easing-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.easing === easing) {
+                opt.classList.add('selected');
+            }
+        });
+    }
+
+    function applyEasing() {
+        if (!selectedKeyframe) return;
+        
+        const { objId, kfIndex } = selectedKeyframe;
+        if (animationData[objId]?.keyframes[kfIndex]) {
+            saveKeyframeState(); // حفظ الحالة قبل التغيير
+            animationData[objId].keyframes[kfIndex].easing = tempEasing;
+            selectedEasing = tempEasing;
+        }
+        
+        closeEasingPopup();
+        renderTracks();
+    }
+
+    // --- Undo/Redo للـ Keyframes ---
+    function saveKeyframeState() {
+        // حفظ نسخة عميقة من animationData
+        const state = JSON.stringify(animationData);
+        keyframeHistory.push(state);
+        
+        // الحد الأقصى للتاريخ
+        if (keyframeHistory.length > 50) {
+            keyframeHistory.shift();
+        }
+        
+        // مسح redo stack عند إجراء جديد
+        keyframeRedoStack = [];
+    }
+
+    function undoKeyframe() {
+        if (keyframeHistory.length === 0) {
+            alert('لا يوجد شيء للتراجع عنه');
+            return;
+        }
+        
+        // حفظ الحالة الحالية في redo stack
+        keyframeRedoStack.push(JSON.stringify(animationData));
+        
+        // استرجاع الحالة السابقة
+        const previousState = keyframeHistory.pop();
+        animationData = JSON.parse(previousState);
+        
+        renderTracks();
+        applyAnimationAtTime(currentTime);
+    }
+
+    function redoKeyframe() {
+        if (keyframeRedoStack.length === 0) {
+            alert('لا يوجد شيء لإعادته');
+            return;
+        }
+        
+        // حفظ الحالة الحالية في history
+        keyframeHistory.push(JSON.stringify(animationData));
+        
+        // استرجاع الحالة التالية
+        const nextState = keyframeRedoStack.pop();
+        animationData = JSON.parse(nextState);
+        
+        renderTracks();
+        applyAnimationAtTime(currentTime);
+    }
+
+    // Easing calculation functions
+    function applyEasingFunction(t, easing) {
+        switch(easing) {
+            case 'linear':
+                return t;
+            case 'ease-in':
+                return t * t;
+            case 'ease-out':
+                return t * (2 - t);
+            case 'ease-in-out':
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            case 'bounce':
+                if (t < 1 / 2.75) {
+                    return 7.5625 * t * t;
+                } else if (t < 2 / 2.75) {
+                    return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+                } else if (t < 2.5 / 2.75) {
+                    return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+                } else {
+                    return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+                }
+            case 'elastic':
+                return t === 0 || t === 1 ? t : 
+                    -Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.1) * 5 * Math.PI);
+            default:
+                return t;
+        }
+    }
+
+
+</script>
+
+</body>
+</html>
