@@ -3,214 +3,525 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>imoko | رحلة الإبداع</title>
+    <title>imoko | Galaxy Center 😍</title>
     <style>
         :root {
-            --bg-dark: #0b0f19;
-            --card-bg: #161b22;
-            --accent-pink: #f472b6;
+            --bg: #020617;
             --anime-cyan: #00f2ff;
-            --text-main: #e6edf3;
-            --text-muted: #8b949e;
+            --pro-pink: #ff007b;
+            --purple: #a855f7;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            color: white;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
+        /* --- النجوم المتساقطة المحسّنة --- */
+        .star-field {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
+            box-shadow: 0 0 4px white;
+        }
+        
+        .star.twinkle {
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes flowUp { 
+            from { transform: translateY(110vh); opacity: 0; } 
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            to { transform: translateY(-10vh); opacity: 0; } 
+        }
+        
+        @keyframes flowDown { 
+            from { transform: translateY(-10vh); opacity: 0; } 
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            to { transform: translateY(110vh); opacity: 0; } 
         }
 
-        .logo {
+        /* --- الحاوية والتصميم --- */
+        .container { 
+            width: 100%; 
+            max-width: 750px; 
+            position: relative; 
+            z-index: 1;
+        }
+        
+        header { 
+            text-align: center; 
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .logo-emoji {
             font-size: 70px;
-            text-shadow: 0 0 20px rgba(244, 114, 182, 0.5);
+            display: inline-block;
+            animation: logoFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
         }
-
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
         h1 {
-            font-size: 3rem;
-            margin: 10px 0;
-            background: linear-gradient(45deg, var(--accent-pink), #7c3aed);
+            margin: 15px 0 10px;
+            letter-spacing: 5px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--anime-cyan), var(--pro-pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
         }
-
-        .main-desc {
-            color: var(--text-muted);
-            max-width: 500px;
-            margin: 0 auto 30px;
-            line-height: 1.6;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .version-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 1px solid #30363d;
+        
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px 32px;
+            margin-bottom: 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            transition: all 0.4s ease;
         }
 
-        /* --- تصميم إصدار الأنمي 5.4 --- */
-        .v-5-4 {
-            border: 2px solid var(--anime-cyan);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-        }
-        .v-5-4::after {
-            content: "ANIME UPDATE";
+        .card::before {
+            content: '';
             position: absolute;
-            top: 10px;
-            left: -30px;
-            background: var(--anime-cyan);
-            color: #000;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 5px 40px;
-            transform: rotate(-45deg);
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: 0.3s;
         }
 
-        /* --- تصميم الإصدار الأول (عادي) --- */
-        .v-1-0 {
-            opacity: 0.8;
-            filter: grayscale(0.5);
+        .card:hover { 
+            border-color: rgba(255,255,255,0.3); 
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
         }
 
-        .version-header {
+        .version-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        h2 { 
+            font-size: 1.5rem;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .version-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .version-desc {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-left: 20px;
-        }
-
-        .actions {
-            display: flex;
+            align-items: center;
             gap: 10px;
-            margin-top: 15px;
+        }
+        
+        .version-badge {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* أزرار التشغيل والتحميل */
+        .action-btns {
+            display: flex;
+            gap: 2px;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border-radius: 14px;
+            width: fit-content;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .btn {
             padding: 10px 20px;
-            border-radius: 12px;
-            text-decoration: none;
+            font-size: 0.85rem;
             font-weight: bold;
-            font-size: 0.9rem;
-            transition: 0.3s;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: none;
         }
 
-        .btn-run { background: var(--accent-pink); color: white; }
-        .btn-run:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(244, 114, 182, 0.4); }
+        .btn-run { 
+            border-radius: 10px 0 0 10px;
+            position: relative;
+            overflow: hidden;
+        }
         
-        .btn-download { background: #30363d; color: white; border: 1px solid #8b949e; }
-        .btn-download:hover { background: #484f58; }
+        .btn-run::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-run:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .btn-down { 
+            border-radius: 0 10px 10px 0;
+            background: #1e293b;
+            border-left: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .btn:hover { 
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
 
-        /* ميزانية 5.4 الخاصة بالأنمي */
-        .v-5-4 .btn-run {
+        /* إصدار 5.4 - أنمي */
+        .v-5-4 { 
+            border-right: 5px solid var(--anime-cyan);
+            animation: float 4s ease-in-out infinite;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.05) 0%, var(--glass) 100%);
+        }
+        
+        .v-5-4::after {
+            content: '✨';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            opacity: 0.3;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.6; }
+        }
+        
+        .v-5-4 .btn-run { 
+            background: linear-gradient(135deg, var(--anime-cyan), #0088ff);
+            color: #000;
+            font-weight: 900;
+        }
+        
+        .v-5-4 .version-badge {
             background: var(--anime-cyan);
             color: #000;
         }
+        
+        @keyframes float { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-10px); } 
+        }
 
-        footer {
-            margin-top: 50px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
+        /* إصدار 5.3 - تفاعلي */
+        .v-5-3 { 
+            position: relative;
+            min-height: 220px;
+            border-right: 5px solid var(--pro-pink);
+            background: linear-gradient(135deg, rgba(255, 0, 123, 0.05) 0%, var(--glass) 100%);
+        }
+        
+        .v-5-3::after {
+            content: '🎮';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            opacity: 0.3;
+        }
+        
+        .interactive-bar { 
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        
+        .mini-btn { 
+            padding: 6px 12px;
+            font-size: 11px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .mini-btn:hover {
+            background: var(--pro-pink);
+            color: white;
+            border-color: var(--pro-pink);
+            transform: translateY(-2px);
+        }
+        
+        .v-5-3 .btn-run {
+            background: linear-gradient(135deg, var(--pro-pink), #ff4081);
+        }
+        
+        .v-5-3 .version-badge {
+            background: var(--pro-pink);
+            color: white;
+        }
+
+        /* إصدار 2.0 - احترافي */
+        .v-2-0 {
+            border-right: 5px solid var(--purple);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, var(--glass) 100%);
+        }
+        
+        .v-2-0::after {
+            content: '🎨';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            opacity: 0.3;
+        }
+        
+        .v-2-0 .btn-run {
+            background: linear-gradient(135deg, var(--purple), #c084fc);
+        }
+        
+        .v-2-0 .version-badge {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* إصدار 1.0 - كلاسيك (بدون مميزات) */
+        .v-1 { 
+            opacity: 0.85;
+            background: var(--glass);
+            border-right: 5px solid #475569;
+        }
+        
+        .v-1::after {
+            content: '📦';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            opacity: 0.2;
+        }
+        
+        .v-1 .btn-run { 
+            background: #475569;
+        }
+        
+        .v-1 h2 {
+            color: #94a3b8;
+        }
+        
+        .v-1 .version-badge {
+            background: #475569;
+            color: white;
+        }
+
+        .desc { 
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .logo-emoji { font-size: 50px; }
+            .card { padding: 20px 24px; }
+            .version-header { flex-direction: column; align-items: flex-start; }
+            .action-btns { width: 100%; }
+            .btn { flex: 1; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="logo">😍</div>
+    <div class="star-field" id="starField"></div>
+
+    <header>
+        <div class="logo-emoji">😍</div>
         <h1>imoko</h1>
-        <p class="main-desc">برنامج مفتوح المصدر لصنع لوحات احترافية بالإيموجيات فقط.</p>
+        <p class="desc">الجيل القادم من لوحات الإيموجي</p>
     </header>
 
     <div class="container">
-        
-        <div class="version-card v-5-4">
+
+        <div class="card v-5-4">
             <div class="version-header">
-                <div>
-                    <div class="version-title" style="color: var(--anime-cyan);">imoko 5.4</div>
-                    <div class="version-desc">إصدار الأنمي المنتظر! إضافة نظام **الأنيميشن (Animation)** و **الكي فريم (Keyframes)** لصنع لوحات متحركة مبهرة.</div>
+                <h2>
+                    imoko 5.4
+                    <span class="version-badge">ANIME</span>
+                </h2>
+                <div class="action-btns">
+                    <a href="5.4.html" class="btn btn-run">▶ Run</a>
+                    <a href="javascript:void(0)" onclick="dl('5.4')" class="btn btn-down">⬇ Download</a>
                 </div>
             </div>
-            <div class="actions">
-                <a href="5.4.html" class="btn btn-download" download>Download</a>
-                <a href="5.4.html" class="btn btn-run">Run (Neo Anime)</a>
-            </div>
+            <p class="desc">إصدار الأنمي والكي فريم لتحريك اللوحات بذكاء.</p>
         </div>
 
-        <div class="version-card">
+        <div class="card v-5-3" id="area53">
             <div class="version-header">
-                <div>
-                    <div class="version-title">imoko 5.3</div>
-                    <div class="version-desc">تحديث ضخم! إضافة **قائمة الخصائص** الشاملة وإمكانية **إضافة النصوص** بجانب الإيموجيات للتحكم الكامل.</div>
+                <h2>
+                    imoko 5.3
+                    <span class="version-badge">INTERACTIVE</span>
+                </h2>
+                <div class="action-btns" id="btnGroup53">
+                    <a href="5.3.html" id="run-5-3" class="btn btn-run">▶ Run</a>
+                    <a href="javascript:void(0)" onclick="dl('5.3')" class="btn btn-down">⬇ Download</a>
                 </div>
             </div>
-            <div class="actions">
-                <a href="5.3.html" class="btn btn-download" download>Download</a>
-                <a href="5.3.html" class="btn btn-run">Run</a>
+            <div class="interactive-bar">
+                <button class="mini-btn" onclick="alert('System Active ✓')">Status</button>
+                <button class="mini-btn" onclick="document.body.style.letterSpacing='2px'">Space</button>
+                <button class="mini-btn" onclick="this.style.background='#00f2ff'">Color</button>
             </div>
+            <p class="desc">تحديث النصوص والخصائص مع زر تشغيل تفاعلي.</p>
         </div>
 
-        <div class="version-card">
+        <div class="card v-2-0">
             <div class="version-header">
-                <div>
-                    <div class="version-title">imoko 2.0</div>
-                    <div class="version-desc">تحديث المظهر! تم في هذا الإصدار إضافة نظام **الثيمات (Themes)** المتعددة لتخصيص واجهة البرنامج.</div>
+                <h2>
+                    imoko 2.0
+                    <span class="version-badge">PRO</span>
+                </h2>
+                <div class="action-btns">
+                    <a href="2.0.html" class="btn btn-run">▶ Run</a>
+                    <a href="javascript:void(0)" onclick="dl('2.0')" class="btn btn-down">⬇ Download</a>
                 </div>
             </div>
-            <div class="actions">
-                <a href="2.0.html" class="btn btn-download" download>Download</a>
-                <a href="2.0.html" class="btn btn-run">Run</a>
-            </div>
+            <p class="desc">أول إصدار احترافي يدعم نظام الثيمات المتكامل.</p>
         </div>
 
-        <div class="version-card v-1-0">
+        <div class="card v-1">
             <div class="version-header">
-                <div>
-                    <div class="version-title">imoko 1.0</div>
-                    <div class="version-desc">التحديث الأول والانطلاقة الأساسية للبرنامج. بسيط، سريع، وبدون إضافات معقدة.</div>
+                <h2>
+                    imoko 1.0
+                    <span class="version-badge">CLASSIC</span>
+                </h2>
+                <div class="action-btns">
+                    <a href="1.0.html" class="btn btn-run">▶ Run</a>
+                    <a href="javascript:void(0)" onclick="dl('1.0')" class="btn btn-down">⬇ Download</a>
                 </div>
             </div>
-            <div class="actions">
-                <a href="1.0.html" class="btn btn-download" download>Download</a>
-                <a href="1.0.html" class="btn btn-run">Run</a>
-            </div>
+            <p class="desc">النسخة الأساسية البسيطة والعملية.</p>
         </div>
 
     </div>
 
-    <footer>
-        جميع الحقوق محفوظة 😍 imoko 2026 | مخصص للمبدعين
-    </footer>
+    <script>
+        // وظيفة التحميل الذكية
+        function dl(v) {
+            const html = `<!DOCTYPE html><html><body style="background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><h1>imoko v${v} Installed!</h1></body></html>`;
+            const blob = new Blob([html], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `imoko_${v}.html`;
+            a.click();
+        }
 
+        // إنشاء النجوم المحسّنة
+        const field = document.getElementById('starField');
+        for (let i = 0; i < 120; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            if (Math.random() > 0.7) {
+                star.classList.add('twinkle');
+            }
+            
+            const size = Math.random() * 3 + 0.5 + 'px';
+            star.style.width = size;
+            star.style.height = size;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            
+            const duration = Math.random() * 20 + 15;
+            star.style.animation = `${duration}s linear infinite ${i % 2 === 0 ? 'flowUp' : 'flowDown'}`;
+            star.style.animationDelay = Math.random() * 10 + 's';
+            
+            field.appendChild(star);
+        }
+
+        // مقلب زر 5.3 المحسّن
+        const run53 = document.getElementById('run-5-3');
+        const area = document.getElementById('area53');
+        let pranked = false;
+        let escapeCount = 0;
+
+        run53.addEventListener('mouseenter', () => {
+            if (!pranked && escapeCount < 3) {
+                const maxX = area.clientWidth - run53.parentElement.clientWidth - 40;
+                const maxY = area.clientHeight - run53.parentElement.clientHeight - 60;
+                const group = document.getElementById('btnGroup53');
+                group.style.position = 'absolute';
+                group.style.transition = 'all 0.3s ease';
+                group.style.left = Math.random() * maxX + 20 + 'px';
+                group.style.top = Math.random() * maxY + 40 + 'px';
+                
+                const messages = ['Catch! 😂', 'Not yet! 😜', 'Almost! 🎯'];
+                run53.innerHTML = `▶ ${messages[escapeCount]}`;
+                escapeCount++;
+                
+                if (escapeCount === 3) {
+                    setTimeout(() => {
+                        run53.innerHTML = '▶ Ok, Run 😅';
+                        pranked = true;
+                    }, 500);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
