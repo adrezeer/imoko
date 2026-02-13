@@ -10,6 +10,8 @@
             --anime-cyan: #00f2ff;
             --pro-pink: #ff007b;
             --purple: #a855f7;
+            --glow-gold: #ffd700;
+            --glow-orange: #ff8c00;
             --glass: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
@@ -224,6 +226,141 @@
             transform: scale(1.05);
         }
 
+        /* إصدار 6.0 - الإضاءة المتوهجة */
+        .v-6-0 {
+            border-right: 5px solid var(--glow-gold);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 140, 0, 0.05) 50%, var(--glass) 100%);
+            animation: glowPulse 3s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.2),
+                0 0 60px rgba(255, 140, 0, 0.1),
+                inset 0 0 40px rgba(255, 215, 0, 0.05);
+        }
+        
+        .v-6-0::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            animation: rotateGlow 8s linear infinite;
+            pointer-events: none;
+        }
+        
+        .v-6-0::after {
+            content: '💡';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 35px;
+            opacity: 0.4;
+            animation: lightFlicker 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.2),
+                    0 0 60px rgba(255, 140, 0, 0.1),
+                    inset 0 0 40px rgba(255, 215, 0, 0.05);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(255, 215, 0, 0.4),
+                    0 0 80px rgba(255, 140, 0, 0.2),
+                    inset 0 0 60px rgba(255, 215, 0, 0.1);
+            }
+        }
+        
+        @keyframes rotateGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes lightFlicker {
+            0%, 100% { 
+                opacity: 0.4; 
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+            }
+            25% { 
+                opacity: 0.6; 
+                filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1));
+            }
+            50% { 
+                opacity: 0.5; 
+                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9));
+            }
+            75% { 
+                opacity: 0.7; 
+                filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1));
+            }
+        }
+        
+        .v-6-0 h2 {
+            color: #fff;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.6),
+                0 0 20px rgba(255, 140, 0, 0.4);
+            animation: textGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes textGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.6),
+                    0 0 20px rgba(255, 140, 0, 0.4);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 20px rgba(255, 215, 0, 0.8),
+                    0 0 30px rgba(255, 140, 0, 0.6);
+            }
+        }
+        
+        .v-6-0 .btn-run {
+            background: linear-gradient(135deg, var(--glow-gold), var(--glow-orange));
+            color: #000;
+            font-weight: 900;
+            box-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.5),
+                0 0 40px rgba(255, 140, 0, 0.3);
+            animation: btnGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes btnGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px rgba(255, 215, 0, 0.5),
+                    0 0 40px rgba(255, 140, 0, 0.3);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.7),
+                    0 0 50px rgba(255, 140, 0, 0.5);
+            }
+        }
+        
+        .v-6-0 .version-badge {
+            background: linear-gradient(135deg, var(--glow-gold), var(--glow-orange));
+            color: #000;
+            font-weight: 900;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            animation: badgeGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+        }
+        
+        .v-6-0 .desc {
+            color: #ffd700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        }
+
         /* إصدار 5.4 - أنمي */
         .v-5-4 { 
             border-right: 5px solid var(--anime-cyan);
@@ -396,6 +533,20 @@
     </header>
 
     <div class="container">
+
+        <div class="card v-6-0">
+            <div class="version-header">
+                <h2>
+                    imoko 6.0
+                    <span class="version-badge">GLOW</span>
+                </h2>
+                <div class="action-btns">
+                    <a href="6.0.html" class="btn btn-run">▶ Run</a>
+                    <a href="javascript:void(0)" onclick="dl('6.0')" class="btn btn-down">⬇ Download</a>
+                </div>
+            </div>
+            <p class="desc">إصدار الإضاءة المتوهجة مع تأثيرات بصرية ساحرة ونظام إنارة ذكي.</p>
+        </div>
 
         <div class="card v-5-4">
             <div class="version-header">
